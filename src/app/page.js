@@ -1,5 +1,6 @@
 import Header from "@/components/home/Header";
 import HeroSection from "@/components/home/HeroSection";
+import NewArrivalSection from "@/components/home/NewArrivalSection";
 import PartnerBrandsSlider from "@/components/home/PartnerBrandsSlider";
 
 export default function Home() {
@@ -14,6 +15,9 @@ export default function Home() {
 
       {/* Partner/brand logos strip below hero */}
       <PartnerBrandsSlider />
+
+      {/* New arrivals cards section */}
+      <NewArrivalSection />
     </main>
   );
 }

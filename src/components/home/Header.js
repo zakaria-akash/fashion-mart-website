@@ -21,8 +21,8 @@ export default function Header() {
   }, [menuOpen]);
 
   return (
-    // Sticky only on mobile so menu and trigger stay anchored at the top.
-    <header className="sticky top-0 z-[80] bg-[#f4f6f5]/95 backdrop-blur lg:static lg:bg-transparent lg:backdrop-blur-none">
+    // Sticky header across all breakpoints so it remains visible while scrolling.
+    <header className="sticky top-0 z-[80] bg-[#f4f6f5]/95 backdrop-blur lg:bg-[#f4f6f5]/95 lg:backdrop-blur">
       {/* Desktop/mobile shared header row container. */}
       <div className="mx-auto w-full max-w-[1320px] px-4 pt-5 sm:px-6 lg:px-10 lg:pt-8">
         <div className="flex items-center justify-between">
