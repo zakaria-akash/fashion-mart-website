@@ -2,7 +2,7 @@
 
 ## Project Name
 
-Nickelfox Website Clone
+Fashion Mart Website Clone
 
 ## Purpose
 

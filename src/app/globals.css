@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+/* Keep width/height calculations predictable for layout precision. */
+* {
+  box-sizing: border-box;
+}
+
+/* Global page defaults. */
 body {
   margin: 0;
+  background: #ffffff;
+    color: #000000;
+  }
+  
+  /* Links inherit current text color unless locally overridden. */
+  a {
+    color: inherit;
+    text-decoration: none;
 }
