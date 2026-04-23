@@ -7,7 +7,7 @@ export default function DownloadAppSection() {
       {/* Responsive layout: mobile stacks content, phone, then badges; desktop uses two-column alignment. */}
       <div className="grid grid-cols-1 items-center gap-x-5 gap-y-2 lg:grid-cols-2 lg:items-center lg:gap-x-4 lg:gap-y-0 xl:gap-x-6">
         {/* Left content text block with requested typography mapping from Young's Favourite styles. */}
-        <div className="order-1 lg:order-1 lg:self-center lg:pl-8 xl:pl-14">
+        <div className="motion-fade-up order-1 lg:order-1 lg:self-center lg:pl-8 xl:pl-14">
           <h2 className="max-w-[360px] text-[1.5rem] font-black uppercase leading-[1.1] tracking-[0.01em] text-black">
             DOWNLOAD APP &amp; GET THE VOUCHER!
           </h2>
@@ -36,7 +36,7 @@ export default function DownloadAppSection() {
         </div>
 
         {/* Right promotional phone artwork with soft decorative circles as in reference. */}
-        <div className="order-2 -mt-1 flex justify-center lg:order-2 lg:-mt-3 lg:justify-end">
+        <div className="motion-scale-in motion-delay-1 order-2 -mt-1 flex justify-center lg:order-2 lg:-mt-3 lg:justify-end">
           <div className="relative">
             <span className="absolute -left-7 top-[20%] h-[11px] w-[11px] rounded-full bg-[#8e8e8e] lg:-left-10" />
             <span className="absolute -right-4 top-[10%] h-[18px] w-[18px] rounded-full bg-[#e6cf4b] lg:-right-7" />
@@ -51,13 +51,14 @@ export default function DownloadAppSection() {
               alt="Fashion mobile app preview"
               width={671}
               height={882}
+              sizes="(max-width: 1024px) 80vw, 42vw"
               className="h-auto w-[260px] sm:w-[305px] md:w-[340px] lg:w-[480px] xl:w-[530px]"
             />
           </div>
         </div>
 
         {/* Mobile badges stay below phone for mobile reference parity. */}
-        <div className="order-3 -mt-2 flex items-center justify-center gap-2 lg:hidden">
+        <div className="motion-fade-up motion-delay-2 order-3 -mt-2 flex items-center justify-center gap-2 lg:hidden">
           <Image
             src="/images/Download-App-Section/apple-store-logo.png"
             alt="Download on the App Store"

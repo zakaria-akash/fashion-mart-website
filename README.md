@@ -1,46 +1,60 @@
 # Fashion Mart Website Clone
 
-A high-fidelity one-page fashion website clone built with Next.js, designed from provided desktop and mobile references and prepared for phased expansion into dynamic product and user features.
+Fashion Mart is a Next.js App Router fashion-commerce experience built from the provided references and extended through phased delivery into a MongoDB-backed application with authentication, product browsing, admin management, wishlist persistence, newsletter capture, and email verification.
 
-## Current Direction
+## Current Status
 
-The UI foundation is in place and the project is now prepared to evolve into a dynamic application with backend integration and role-based workflows.
+- Phase 0 to Phase 5 implementation is now covered
+- Internal APIs serve runtime product data from MongoDB
+- DummyJSON is used only for seed/sync import
+- Product images are served through GridFS file routes
+- Signup requires email verification before login
+- Session-aware header state swaps `Login` to `Log Out`
 
-## Mandatory Product Scope
+## Core Features
 
-- User authentication: signup and login
-- Product browsing with category-based display
-- Wishlist: mark and unmark favourite products
-- Dedicated lifestyle page linked from header navigation
-- Basic admin panel to:
-  - Add products
-  - Manage product listings
+- User signup, login, logout, session lookup, resend verification, and email verification
+- Catalogue browsing, dedicated fashion edit, product detail, wishlist, and lifestyle pages
+- Newsletter capture with validation
+- Admin product CRUD plus DummyJSON-to-Mongo sync
+- Global toast feedback and refined motion polish
 
-## Data and Backend Direction
-
-- Seed product source: DummyJSON Products API
-- Runtime source of truth: MongoDB
-- File/image storage: MongoDB GridFS
-- API runtime: Next.js route handlers (or Express split service if needed)
-
-## Project Documentation
-
-- [AppOverview.md](AppOverview.md)
-- [FrontendGuide.md](FrontendGuide.md)
-- [BackendGuide.md](BackendGuide.md)
-- [WorkFlow.md](WorkFlow.md)
-
-## Development Commands
+## Development
 
 ```bash
+npm install
 npm run dev
 npm run lint
 npm run build
 npm run start
 ```
 
-## Notes
+## Environment
 
-- Shared shell components such as header and footer are placed in app layout for multi-page scalability.
-- UI components are structured to support incremental migration from static content to API-driven data.
-- Header primary CTA is Login, and Login/Sign Up pages provide direct two-way navigation.
+Copy values into `.env.local` as needed:
+
+- `MONGODB_URI`
+- `MONGODB_DB_NAME`
+- `GRIDFS_PRODUCT_BUCKET`
+- `GRIDFS_MARKETING_BUCKET`
+- `DUMMYJSON_BASE_URL`
+- `PRODUCT_SYNC_ADMIN_TOKEN`
+- `AUTH_JWT_SECRET`
+- `APP_BASE_URL`
+- `ADMIN_EMAILS`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_FROM_EMAIL`
+- `SMTP_FROM_NAME`
+
+## Documentation
+
+- [AppOverview.md](AppOverview.md)
+- [FrontendGuide.md](FrontendGuide.md)
+- [BackendGuide.md](BackendGuide.md)
+- [WorkFlow.md](WorkFlow.md)
+- [QA_REPORT.md](QA_REPORT.md)
+- [HANDOVER.md](HANDOVER.md)
+- [RELEASE_READINESS.md](RELEASE_READINESS.md)

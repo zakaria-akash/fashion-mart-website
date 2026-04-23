@@ -38,7 +38,7 @@ const footerColumns = [
 export default function AppFooter() {
   return (
     // Footer block at the bottom of the page as in the reference layouts.
-    <footer className="w-full bg-black">
+    <footer className="motion-fade-in w-full bg-black">
       {/* Main footer body with responsive brand + columns arrangement. */}
       <div className="mx-auto w-full max-w-[1320px] px-4 pb-10 pt-10 sm:px-6 lg:px-10 lg:pb-14 lg:pt-14">
         <div className="grid grid-cols-1 gap-9 lg:grid-cols-[1.05fr_1.95fr] lg:gap-20">
@@ -52,7 +52,12 @@ export default function AppFooter() {
             {/* Social icons: 32x32, 10px gap, 5px radius as requested. */}
             <div className="mt-5 flex items-center gap-[10px]">
               {socialIcons.map((icon) => (
-                <a key={icon.alt} href="#" aria-label={icon.alt} className="inline-flex">
+                <a
+                  key={icon.alt}
+                  href="#"
+                  aria-label={icon.alt}
+                  className="inline-flex rounded-[5px] transition-transform duration-200 hover:-translate-y-[2px]"
+                >
                   <Image
                     src={icon.src}
                     alt={icon.alt}
@@ -77,7 +82,7 @@ export default function AppFooter() {
                     <li key={link.label}>
                       <a
                         href={link.href}
-                        className="block text-[0.8rem] font-light leading-[1.5] tracking-[0.03em] !text-[#a8a8a8] transition-colors duration-200 hover:!text-[#d9d9d9] sm:text-[0.9rem] lg:text-[1rem]"
+                        className="block rounded-[6px] text-[0.8rem] font-light leading-[1.5] tracking-[0.03em] !text-[#a8a8a8] transition-colors duration-200 hover:!text-[#d9d9d9] sm:text-[0.9rem] lg:text-[1rem]"
                       >
                         {link.label}
                       </a>

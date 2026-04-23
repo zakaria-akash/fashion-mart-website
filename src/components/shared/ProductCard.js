@@ -20,7 +20,7 @@ function WishlistButton({ active, onToggle }) {
 
 export default function ProductCard({ product, wished, onToggleWishlist }) {
   return (
-    <article className="group relative cursor-pointer overflow-hidden rounded-[18px] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-transform duration-200 hover:-translate-y-[4px]">
+    <article className="group interactive-lift relative cursor-pointer overflow-hidden rounded-[18px] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
       <Link
         href={`/products/${product.id}`}
         aria-label={`View details for ${product.title}`}
