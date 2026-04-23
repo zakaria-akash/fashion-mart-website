@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/shared/ProductCard";
 import { fetchWishlistProducts, toggleWishlistId } from "@/lib/wishlistStorage";
+import { useCart } from "@/components/providers/CartProvider";
 
 /**
  * WishlistButton Sub-component
@@ -46,7 +47,11 @@ function InfoCard({ label, value }) {
  * Features an interactive gallery layout, detailed specs, and related product discovery.
  */
 export default function ProductDetailClientPage({ product, relatedProducts }) {
+  const { addToCart } = useCart();
   const [wishlistIds, setWishlistIds] = useState([]);
+  const [selectedSize, setSelectedSize] = useState("M");
+  const [selectedColor, setSelectedColor] = useState("Black");
+  const [quantity, setQuantity] = useState(1);
   
   // Safe defaults for array-based product properties
   const productSizes = Array.isArray(product.sizes) ? product.sizes : [];
@@ -175,12 +180,17 @@ export default function ProductDetailClientPage({ product, relatedProducts }) {
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2.5">
                   {productSizes.map((size) => (
-                    <span
+                    <button
                       key={size}
-                      className="inline-flex min-w-12 justify-center rounded-full border border-black/10 bg-[#f8f8f8] px-4 py-2 text-[0.86rem] font-medium text-black"
+                      onClick={() => setSelectedSize(size)}
+                      className={`inline-flex min-w-12 justify-center rounded-full border px-4 py-2 text-[0.86rem] font-medium transition-all ${
+                        selectedSize === size
+                          ? "border-black bg-black text-white"
+                          : "border-black/10 bg-[#f8f8f8] text-black hover:border-black/30"
+                      }`}
                     >
                       {size}
-                    </span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -191,13 +201,39 @@ export default function ProductDetailClientPage({ product, relatedProducts }) {
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2.5">
                   {productColors.map((color) => (
-                    <span
+                    <button
                       key={color}
-                      className="inline-flex rounded-full border border-black/10 px-4 py-2 text-[0.86rem] text-black/75"
+                      onClick={() => setSelectedColor(color)}
+                      className={`inline-flex rounded-full border px-4 py-2 text-[0.86rem] transition-all ${
+                        selectedColor === color
+                          ? "border-black bg-black text-white"
+                          : "border-black/10 bg-white text-black/75 hover:border-black/30"
+                      }`}
                     >
                       {color}
-                    </span>
+                    </button>
                   ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 pt-2">
+                <p className="text-[0.82rem] font-medium uppercase tracking-[0.14em] text-black/45">
+                  Quantity
+                </p>
+                <div className="flex items-center rounded-full border border-black/10 p-1">
+                  <button
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-black/5"
+                  >
+                    -
+                  </button>
+                  <span className="mx-3 text-[0.95rem] font-medium">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity((q) => q + 1)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-black/5"
+                  >
+                    +
+                  </button>
                 </div>
               </div>
 
@@ -220,12 +256,12 @@ export default function ProductDetailClientPage({ product, relatedProducts }) {
 
             {/* Main Action Buttons */}
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link
-                href="/products"
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#e6c744] px-6 text-[0.9rem] font-medium uppercase tracking-[0.08em] text-black transition-colors duration-200 hover:bg-[#d9bb3f]"
+              <button
+                onClick={() => addToCart(product, quantity, selectedSize, selectedColor)}
+                className="inline-flex min-h-12 flex-1 items-center justify-center rounded-full bg-[#e6c744] px-8 text-[0.9rem] font-bold uppercase tracking-[0.08em] text-black transition-all duration-200 hover:bg-[#d9bb3f] hover:scale-[1.02]"
               >
-                Continue shopping
-              </Link>
+                Add to cart — ${(product.price * quantity).toFixed(2)}
+              </button>
               <WishlistButton active={wished} onToggle={() => handleWishlistToggle(product.id)} />
             </div>
 

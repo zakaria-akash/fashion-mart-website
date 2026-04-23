@@ -17,6 +17,13 @@
 
 - `npm run lint`
 - `npm run build`
+- Manual Shopping Cart verification:
+  - add to cart from catalogue
+  - add to cart from product detail (size/color/qty)
+  - quantity increase/decrease/remove in drawer
+  - persistence across page refresh
+  - checkout block for guest users (login redirect)
+  - guest cart migration to user account on login
 - Manual auth smoke test:
   - signup
   - blocked pre-verification login

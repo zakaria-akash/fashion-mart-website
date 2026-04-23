@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { appRoutes } from "@/lib/config/routes";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
+import { useCart } from "@/components/providers/CartProvider";
 
 // Primary navigation links for the main site menu
 const navItems = [
@@ -25,6 +26,7 @@ export default function Header() {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
   const { showToast } = useToast();
+  const { cartCount, setIsDrawerOpen } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Sync scroll lock with mobile menu state
@@ -88,25 +90,42 @@ export default function Header() {
 
             {/* Auth State Handling */}
             {loading ? (
-              <span className="rounded-[8px] bg-black/10 px-7 py-3 text-[1rem] font-light text-black/60 xl:px-8 xl:py-3.5">
+              <span className="flex h-11 items-center rounded-[8px] bg-black/10 px-7 text-[1rem] font-light text-black/60 xl:px-8">
                 Loading...
               </span>
             ) : user ? (
               <button
                 type="button"
                 onClick={handleLogout}
-                className="rounded-[8px] bg-black px-7 py-3 text-[1rem] font-light !text-white transition-colors duration-200 hover:bg-[#1d1d1d] xl:px-8 xl:py-3.5"
+                className="flex h-11 items-center rounded-[8px] bg-black px-7 text-[1rem] font-light !text-white transition-colors duration-200 hover:bg-[#1d1d1d] xl:px-8"
               >
                 Log Out
               </button>
             ) : (
               <Link
                 href={appRoutes.login}
-                className="rounded-[8px] bg-black px-7 py-3 text-[1rem] font-light !text-white transition-colors duration-200 hover:bg-[#1d1d1d] xl:px-8 xl:py-3.5"
+                className="flex h-11 items-center rounded-[8px] bg-black px-7 text-[1rem] font-light !text-white transition-colors duration-200 hover:bg-[#1d1d1d] xl:px-8"
               >
                 Login
               </Link>
             )}
+
+            {/* Shopping Cart Button */}
+            <button
+              type="button"
+              onClick={() => setIsDrawerOpen(true)}
+              className="relative flex h-11 items-center gap-2 rounded-[8px] bg-black px-5 text-[0.88rem] font-medium uppercase tracking-[0.05em] text-white transition-all duration-200 hover:bg-[#1d1d1d] hover:scale-[1.02]"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 11V7a4 4 0 00-8 0v4M5 9h12l1 12H4L5 9z" />
+              </svg>
+              <span>Cart</span>
+              {cartCount > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#e6c744] text-[0.7rem] font-bold text-black shadow-sm">
+                  {cartCount}
+                </span>
+              )}
+            </button>
           </div>
 
           {/* Mobile Menu Hamburger Trigger */}
@@ -155,22 +174,60 @@ export default function Header() {
                 <p className="text-[0.82rem] font-medium uppercase tracking-[0.08em] text-black/55">
                   Signed in as {user.name}
                 </p>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="block w-full rounded-[8px] bg-black px-7 py-3 text-center text-[1rem] font-light !text-white"
-                >
-                  Log Out
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex-1 rounded-[8px] bg-black px-7 py-3 text-center text-[1rem] font-light !text-white"
+                  >
+                    Log Out
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setIsDrawerOpen(true);
+                    }}
+                    className="relative flex h-[52px] w-[52px] items-center justify-center rounded-[8px] bg-black text-white"
+                  >
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h12l1 12H4L5 9z" />
+                    </svg>
+                    {cartCount > 0 && (
+                      <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#e6c744] text-[0.7rem] font-bold text-black">
+                        {cartCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
             ) : (
-              <Link
-                href={appRoutes.login}
-                onClick={() => setMenuOpen(false)}
-                className="block w-full rounded-[8px] bg-black px-7 py-3 text-center text-[1rem] font-light !text-white"
-              >
-                Login
-              </Link>
+              <div className="flex gap-2">
+                <Link
+                  href={appRoutes.login}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex-1 rounded-[8px] bg-black px-7 py-3 text-center text-[1rem] font-light !text-white"
+                >
+                  Login
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setIsDrawerOpen(true);
+                  }}
+                  className="relative flex h-[52px] w-[52px] items-center justify-center rounded-[8px] bg-black text-white"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h12l1 12H4L5 9z" />
+                  </svg>
+                  {cartCount > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#e6c744] text-[0.7rem] font-bold text-black">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
+              </div>
             )}
           </div>
         </nav>

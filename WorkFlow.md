@@ -97,6 +97,7 @@ Implement complete page sections with high visual fidelity and stable responsive
 - Implement elegant two-way navigation between signup and login screens.
 - Build product browse UI with category filtering.
 - Build wishlist UI states and interaction controls.
+- Build Shopping Cart global state and Drawer UI.
 - Build basic admin panel UI for product add and listing management.
 - Build dedicated lifestyle page and link it from header navigation.
 - Integrate image assets with consistent naming and sizing strategy.
@@ -133,6 +134,7 @@ Connect UI to production-like data and complete required backend capabilities.
 - Seed and upsert initial product records from DummyJSON into MongoDB.
 - Store product images in GridFS and map file identifiers in product records.
 - Implement wishlist persistence and endpoints.
+- Implement guest-to-user cart migration logic.
 - Implement admin product CRUD endpoints with authorization.
 
 ### Phase3 Deliverables

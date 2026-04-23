@@ -18,7 +18,7 @@
 - **🎨 High-Fidelity UI**: ~90% visual accuracy to design references with a custom motion system.
 - **🔄 Dynamic Sync**: Automated pipeline to ingest and normalize data from external APIs (DummyJSON).
 - **🛡️ Secure Auth**: Full JWT-based identity system with email verification and role-based access.
-- **📦 Smart Persistence**: Unified wishlist logic that merges guest sessions into user accounts.
+- **📦 Smart Persistence**: Unified wishlist and shopping cart logic that merges guest sessions into user accounts.
 - **🖼️ GridFS Integration**: Internal high-performance image streaming with aggressive caching.
 
 ---

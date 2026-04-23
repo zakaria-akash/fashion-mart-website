@@ -3,6 +3,8 @@ import AppFooter from "@/components/home/AppFooter";
 import Header from "@/components/home/Header";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
+import { CartProvider } from "@/components/providers/CartProvider";
+import CartDrawer from "@/components/cart/CartDrawer";
 import { Poppins } from "next/font/google";
 
 /**
@@ -39,14 +41,20 @@ export default function RootLayout({ children }) {
         <ToastProvider>
           {/* Global User session management layer */}
           <AuthProvider>
-            {/* Global navigation header */}
-            <Header />
+            {/* Global Shopping Cart layer */}
+            <CartProvider>
+              {/* Global navigation header */}
+              <Header />
 
-            {/* Dynamic page content */}
-            {children}
+              {/* Dynamic page content */}
+              {children}
 
-            {/* Global site footer */}
-            <AppFooter />
+              {/* Global site footer */}
+              <AppFooter />
+
+              {/* Global Cart UI */}
+              <CartDrawer />
+            </CartProvider>
           </AuthProvider>
         </ToastProvider>
       </body>

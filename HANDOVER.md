@@ -5,6 +5,7 @@
 Fashion Mart is now in a release-ready Phase 5 posture with:
 
 - MongoDB-backed products, newsletter, wishlist, and auth flows
+- Global shopping cart with guest-to-user persistence
 - GridFS-based image serving
 - DummyJSON sync into MongoDB as runtime source of truth
 - Email-verification-based account activation

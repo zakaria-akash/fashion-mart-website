@@ -20,6 +20,7 @@ Use slight, elegant, professional animation across key components. Motion should
 - Authentication: signup and login screens with validation feedback
 - Product Browsing: category-aware product listing and filtering UI
 - Wishlist: mark and unmark favourites from product cards and persist state
+- Shopping Cart: global state managed via Context API with guest and user persistence
 - Admin Panel: product management screens to add and maintain listings
 - Lifestyle: editorial-style lifestyle page linked from header navigation
 
@@ -80,8 +81,10 @@ Define these before implementation starts.
 1. Young's Favourite Cards
 1. App Download Promo
 1. Newsletter CTA
-1. Footer
-1. Authentication Pages (Sign up and Login)
+10. Footer
+11. Shopping Cart Drawer (interactive overlay)
+12. Authentication Pages (Sign up and Login)
+
 1. Product Browsing Page (catalog and category filters)
 1. Wishlist Page (favourite products)
 1. Admin Panel (add product and manage listings)
@@ -174,6 +177,7 @@ Expected behavior.
 - Product browsing supports category-wise exploration
 - Wishlist mark/unmark behavior is functional and persisted
 - Admin panel can add products and manage listings
+- Shopping Cart is functional with quantity controls and guest-to-user migration
 - Newsletter form maps to backend contract
 - No material image-driven layout shift
 - Core performance and accessibility quality checks completed

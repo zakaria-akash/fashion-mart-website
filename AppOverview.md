@@ -46,6 +46,7 @@ The application is a fashion-commerce style landing page with the following key 
 7. Newsletter email submission to backend with strict validation
 8. Slight, elegant, and professional motion across key UI components
 9. Header primary CTA set to Login, with elegant two-way navigation between Login and Sign Up pages
+10. Integrated Shopping Cart with persistent global state, quantity controls, and guest session support
 
 ## Design Direction (From Provided Assets)
 
@@ -62,7 +63,7 @@ The application is a fashion-commerce style landing page with the following key 
 2. Spacing, type hierarchy, and section order match expected structure
 3. Site remains responsive and stable across standard breakpoints
 4. Backend-dependent features function correctly with clean data flow
-5. Authentication, product browsing, wishlist, and admin product management are fully functional
+5. Authentication, product browsing, wishlist, admin, and shopping cart are fully functional
 6. Subtle animations improve polish without hurting readability or performance
 7. Codebase is modular and straightforward to maintain
 
@@ -76,7 +77,7 @@ The application is a fashion-commerce style landing page with the following key 
 
 ## Out of Scope for Initial Build
 
-- Full e-commerce cart/checkout flows
+- Full e-commerce checkout payments (Stripe/Paypal)
 - CMS integration
 - Complex analytics/event pipeline
 

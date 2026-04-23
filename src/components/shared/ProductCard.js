@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useCart } from "@/components/providers/CartProvider";
 
 /**
  * WishlistButton Sub-component
@@ -29,6 +30,7 @@ function WishlistButton({ active, onToggle }) {
  * Includes image, title, category, price, and wishlist controls.
  */
 export default function ProductCard({ product, wished, onToggleWishlist }) {
+  const { addToCart } = useCart();
   return (
     <article className="group interactive-lift relative cursor-pointer overflow-hidden rounded-[18px] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
       {/* Full-card link for navigation to details page */}
@@ -71,11 +73,28 @@ export default function ProductCard({ product, wished, onToggleWishlist }) {
         {/* Pricing and secondary details row */}
         <div className="mt-4 flex items-center justify-between">
           <span className="text-[1.02rem] font-medium text-black">${product.price}</span>
-          <div className="text-right">
-            <span className="block text-[0.84rem] font-light text-black/65">{product.rating} rating</span>
-            <span className="mt-1 block text-[0.78rem] font-medium uppercase tracking-[0.08em] text-[#d0a800]">
-              View details
-            </span>
+          <div className="flex items-center gap-3">
+            {/* Quick Add to Cart */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                addToCart(product);
+              }}
+              className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-black text-white transition-transform duration-200 hover:scale-110 active:scale-95"
+              aria-label="Add to cart"
+            >
+              <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </button>
+            <div className="text-right">
+              <span className="block text-[0.84rem] font-light text-black/65">{product.rating} rating</span>
+              <span className="mt-1 block text-[0.78rem] font-medium uppercase tracking-[0.08em] text-[#d0a800]">
+                View details
+              </span>
+            </div>
           </div>
         </div>
       </div>

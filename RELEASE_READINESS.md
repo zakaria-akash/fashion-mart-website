@@ -24,6 +24,8 @@
 ## Regression Sweep
 
 - Landing page renders and animates without layout shift
+- Shopping Cart supports add/remove/quantity and persists via localStorage
+- Guest cart items migrate correctly to user accounts upon login
 - Product browse, detail, wishlist, and fashion pages work with backend data
 - Signup requires email verification before login
 - Header reflects active session state and exposes logout
