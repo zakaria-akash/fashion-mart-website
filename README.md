@@ -11,6 +11,7 @@ The UI foundation is in place and the project is now prepared to evolve into a d
 - User authentication: signup and login
 - Product browsing with category-based display
 - Wishlist: mark and unmark favourite products
+- Dedicated lifestyle page linked from header navigation
 - Basic admin panel to:
   - Add products
   - Manage product listings
@@ -42,3 +43,4 @@ npm run start
 
 - Shared shell components such as header and footer are placed in app layout for multi-page scalability.
 - UI components are structured to support incremental migration from static content to API-driven data.
+- Header primary CTA is Login, and Login/Sign Up pages provide direct two-way navigation.

@@ -2,9 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { appRoutes } from "@/lib/config/routes";
 
 // Primary navigation entries based on design reference.
-const navItems = ["CATALOGUE", "FASHION", "FAVOURITE", "LIFESTYLE"];
+const navItems = [
+  { label: "CATALOGUE", href: appRoutes.products },
+  { label: "FASHION", href: `${appRoutes.products}?category=women` },
+  { label: "FAVOURITE", href: appRoutes.wishlist },
+  { label: "LIFESTYLE", href: appRoutes.lifestyle },
+];
 
 export default function Header() {
   // Controls mobile navigation overlay visibility.
@@ -27,7 +34,7 @@ export default function Header() {
       <div className="mx-auto w-full max-w-[1320px] px-4 pt-5 sm:px-6 lg:px-10 lg:pt-8">
         <div className="flex items-center justify-between">
           {/* Brand logo block (left side). */}
-          <a href="#" className="flex items-center">
+          <Link href={appRoutes.home} className="flex items-center">
             <Image
               src="/images/company-logo.png"
               alt="Fashion Mart"
@@ -36,29 +43,29 @@ export default function Header() {
               className="h-5 w-auto sm:h-6"
               priority
             />
-          </a>
+          </Link>
 
           {/* Desktop-only nav + CTA group. */}
           <div className="hidden items-center gap-9 lg:flex xl:gap-12">
             <nav className="flex items-center gap-9 xl:gap-12">
               {navItems.map((item) => (
-                <a
-                  key={item}
-                  href="#"
+                <Link
+                  key={item.label}
+                  href={item.href}
                   className="text-[1rem] font-light tracking-[0.02em] text-black transition-opacity duration-200 hover:opacity-70"
                 >
-                  {item}
-                </a>
+                  {item.label}
+                </Link>
               ))}
             </nav>
 
-            {/* Desktop sign-up action. */}
-            <button
-              type="button"
-              className="rounded-[8px] bg-black px-7 py-3 text-[1rem] font-light text-white transition-colors duration-200 hover:bg-[#1d1d1d] xl:px-8 xl:py-3.5"
+            {/* Desktop login action. */}
+            <Link
+              href={appRoutes.login}
+              className="rounded-[8px] bg-black px-7 py-3 text-[1rem] font-light !text-white transition-colors duration-200 hover:bg-[#1d1d1d] xl:px-8 xl:py-3.5"
             >
-              Sign up
-            </button>
+              Login
+            </Link>
           </div>
 
           {/* Mobile hamburger trigger with animated lines. */}
@@ -112,24 +119,25 @@ export default function Header() {
         <nav className="mx-auto w-full max-w-[1320px] rounded-[10px] bg-white/95 px-4 py-3 shadow-[0_14px_36px_rgba(0,0,0,0.12)] backdrop-blur">
           <div className="flex flex-col gap-2.5">
             {navItems.map((item) => (
-              <a
-                key={item}
-                href="#"
+              <Link
+                key={item.label}
+                href={item.href}
                 className="py-1 text-[0.95rem] font-light tracking-[0.02em] text-black"
                 onClick={() => setMenuOpen(false)}
               >
-                {item}
-              </a>
+                {item.label}
+              </Link>
             ))}
           </div>
 
-          {/* Mobile sign-up action. */}
-          <button
-            type="button"
-            className="mt-3 w-full rounded-[8px] bg-black px-7 py-3 text-[1rem] font-light text-white"
+          {/* Mobile login action. */}
+          <Link
+            href={appRoutes.login}
+            onClick={() => setMenuOpen(false)}
+            className="mt-3 w-full rounded-[8px] bg-black px-7 py-3 text-[1rem] font-light !text-white"
           >
-            Sign up
-          </button>
+            Login
+          </Link>
         </nav>
       </div>
     </header>

@@ -94,9 +94,11 @@ Implement complete page sections with high visual fidelity and stable responsive
   - Newsletter section
   - Footer
 - Build auth UI pages: signup and login.
+- Implement elegant two-way navigation between signup and login screens.
 - Build product browse UI with category filtering.
 - Build wishlist UI states and interaction controls.
 - Build basic admin panel UI for product add and listing management.
+- Build dedicated lifestyle page and link it from header navigation.
 - Integrate image assets with consistent naming and sizing strategy.
 - Ensure layout integrity across target breakpoints.
 - Apply semantic markup and accessibility baseline.
@@ -106,6 +108,7 @@ Implement complete page sections with high visual fidelity and stable responsive
 - Full static-to-structured UI that matches references closely.
 - Responsive layouts for desktop, tablet, and mobile.
 - Static-first UI flows for auth, browse, wishlist, and admin screens.
+- Lifestyle route and content page integrated into header navigation.
 
 ### Phase2 Exit Criteria
 

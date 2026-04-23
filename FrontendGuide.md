@@ -21,6 +21,7 @@ Use slight, elegant, professional animation across key components. Motion should
 - Product Browsing: category-aware product listing and filtering UI
 - Wishlist: mark and unmark favourites from product cards and persist state
 - Admin Panel: product management screens to add and maintain listings
+- Lifestyle: editorial-style lifestyle page linked from header navigation
 
 ## Data Source Strategy
 
@@ -71,6 +72,7 @@ Define these before implementation starts.
 ## Page Information Architecture
 
 1. Header/Nav
+1. Header primary CTA: Login
 1. Hero plus CTA
 1. Brand Logos Strip
 1. New Arrivals Grid
@@ -83,10 +85,11 @@ Define these before implementation starts.
 1. Product Browsing Page (catalog and category filters)
 1. Wishlist Page (favourite products)
 1. Admin Panel (add product and manage listings)
+1. Lifestyle Page (style journal, curated cards, and product link-out)
 
 ## Component Breakdown
 
-- Header: logo, nav links, signup button
+- Header: logo, nav links, login button
 - Hero Section: heading group, supporting copy, CTA, hero image
 - Brand Strip: horizontal logo row
 - Product Card: image, title, support line, arrow affordance
@@ -100,6 +103,8 @@ Define these before implementation starts.
 - Wishlist Toggle: reusable favourite control with active/inactive states
 - Admin Product Form: product create/update form with validation
 - Admin Product Table/List: manage existing product records
+- Auth Switcher: elegant two-way toggle between login and signup pages
+- Lifestyle Cards Grid: editorial cards and lifestyle highlights
 
 ## Animation Plan by Section
 

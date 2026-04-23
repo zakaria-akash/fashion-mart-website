@@ -90,6 +90,12 @@ For this project scope, Next.js with MongoDB and GridFS is the default recommend
 
 ## API Contract
 
+### Frontend Route Contract Notes
+
+- Header LIFESTYLE menu points to a dedicated `/lifestyle` page and does not route to login.
+- Header primary authentication CTA is `Login`.
+- Login and signup pages include direct two-way navigation for smooth auth entry.
+
 ### GET /api/products
 
 Purpose:

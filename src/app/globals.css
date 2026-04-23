@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+:root {
+  --color-bg-main: #f4f6f5;
+  --color-accent: #e6c744;
+  --color-text: #000000;
+  --color-surface: #ffffff;
+  --color-muted: #c2c8da;
+  --radius-card: 16px;
+  --radius-cta: 8px;
+  --motion-fast: 200ms;
+  --motion-medium: 320ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
 /* Keep width/height calculations predictable for layout precision. */
 * {
   box-sizing: border-box;
@@ -9,11 +21,40 @@
 body {
   margin: 0;
   background: #ffffff;
-    color: #000000;
+  color: #000000;
   }
   
   /* Links inherit current text color unless locally overridden. */
   a {
     color: inherit;
     text-decoration: none;
+}
+
+.page-shell {
+  min-height: 100vh;
+  background: var(--color-bg-main);
+  color: var(--color-text);
+}
+
+.page-container {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 1320px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .page-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
 }

@@ -33,6 +33,7 @@ The application is a fashion-commerce style landing page with the following key 
 7. App download teaser with phone mockup
 8. Newsletter capture block
 9. Footer with column links and social icons
+10. Dedicated Lifestyle page linked from the header LIFESTYLE menu
 
 ## Core Functional Scope
 
@@ -44,6 +45,7 @@ The application is a fashion-commerce style landing page with the following key 
 6. Basic admin panel to add products and manage product listings
 7. Newsletter email submission to backend with strict validation
 8. Slight, elegant, and professional motion across key UI components
+9. Header primary CTA set to Login, with elegant two-way navigation between Login and Sign Up pages
 
 ## Design Direction (From Provided Assets)
 
