@@ -1,7 +1,9 @@
 import Header from "@/components/home/Header";
 import HeroSection from "@/components/home/HeroSection";
 import NewArrivalSection from "@/components/home/NewArrivalSection";
+import PayDaySaleSection from "@/components/home/PayDaySaleSection";
 import PartnerBrandsSlider from "@/components/home/PartnerBrandsSlider";
+import YoungsFavouriteSection from "@/components/home/YoungsFavouriteSection";
 
 export default function Home() {
   return (
@@ -18,6 +20,12 @@ export default function Home() {
 
       {/* New arrivals cards section */}
       <NewArrivalSection />
+
+      {/* Pay day sale promotional section */}
+      <PayDaySaleSection />
+
+      {/* Young's Favourite cards section */}
+      <YoungsFavouriteSection />
     </main>
   );
 }
