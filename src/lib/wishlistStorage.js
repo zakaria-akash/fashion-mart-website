@@ -1,35 +1,24 @@
-const WISHLIST_KEY = "fashion-mart-wishlist";
+import { apiEndpoints } from "@/lib/api/endpoints";
+import { requestJson } from "@/lib/api/request";
 
-export function getWishlistIds() {
-  if (typeof window === "undefined") {
-    return [];
-  }
-
-  try {
-    const rawValue = window.localStorage.getItem(WISHLIST_KEY);
-    if (!rawValue) {
-      return [];
-    }
-
-    const parsed = JSON.parse(rawValue);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+export async function fetchWishlistProducts() {
+  const payload = await requestJson(apiEndpoints.wishlist);
+  return payload.data ?? [];
 }
 
-export function setWishlistIds(ids) {
-  if (typeof window === "undefined") {
-    return;
-  }
+export async function toggleWishlistId(productId) {
+  const payload = await requestJson(apiEndpoints.wishlist, {
+    method: "POST",
+    body: JSON.stringify({ productId }),
+  });
 
-  window.localStorage.setItem(WISHLIST_KEY, JSON.stringify(ids));
+  return payload.data?.wished ?? false;
 }
 
-export function toggleWishlistId(id) {
-  const current = getWishlistIds();
-  const exists = current.includes(id);
-  const next = exists ? current.filter((item) => item !== id) : [...current, id];
-  setWishlistIds(next);
-  return next;
+export async function removeWishlistId(productId) {
+  const payload = await requestJson(`${apiEndpoints.wishlist}/${productId}`, {
+    method: "DELETE",
+  });
+
+  return payload.data?.wished ?? false;
 }

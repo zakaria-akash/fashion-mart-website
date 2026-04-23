@@ -2,17 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import PageIntro from "@/components/shared/PageIntro";
 import { appRoutes } from "@/lib/config/routes";
+import { apiEndpoints } from "@/lib/api/endpoints";
+import { requestJson } from "@/lib/api/request";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function onSubmit(event) {
+  async function onSubmit(event) {
     event.preventDefault();
-    setSubmitted(false);
+    setSubmitted("");
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       setError("Please enter a valid email address.");
@@ -24,8 +29,24 @@ export default function LoginPage() {
       return;
     }
 
-    setError("");
-    setSubmitted(true);
+    try {
+      setSubmitting(true);
+      setError("");
+
+      const payload = await requestJson(apiEndpoints.authLogin, {
+        method: "POST",
+        body: JSON.stringify(form),
+      });
+
+      const user = payload.data?.user;
+      setSubmitted(`Logged in successfully as ${user?.role || "user"}.`);
+      router.push(user?.role === "admin" ? appRoutes.admin : appRoutes.products);
+      router.refresh();
+    } catch (requestError) {
+      setError(requestError.message || "Unable to login right now.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -83,14 +104,15 @@ export default function LoginPage() {
 
             <button
               type="submit"
+              disabled={submitting}
               className="w-full rounded-[10px] bg-black px-6 py-3 text-[0.95rem] font-medium text-white transition-colors duration-200 hover:bg-[#1d1d1d]"
             >
-              Login
+              {submitting ? "Logging in..." : "Login"}
             </button>
 
             {submitted ? (
               <p className="rounded-[10px] bg-[#EBF9F0] px-3 py-2 text-[0.82rem] text-[#067647]">
-                Credentials format is valid and ready for backend login integration.
+                {submitted}
               </p>
             ) : null}
           </form>

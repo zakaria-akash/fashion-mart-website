@@ -2,13 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import PageIntro from "@/components/shared/PageIntro";
 import { appRoutes } from "@/lib/config/routes";
+import { apiEndpoints } from "@/lib/api/endpoints";
+import { requestJson } from "@/lib/api/request";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   function validate(nextForm) {
     const nextErrors = {};
@@ -28,11 +33,35 @@ export default function SignupPage() {
     return nextErrors;
   }
 
-  function onSubmit(event) {
+  async function onSubmit(event) {
     event.preventDefault();
     const nextErrors = validate(form);
     setErrors(nextErrors);
-    setSubmitted(Object.keys(nextErrors).length === 0);
+
+    if (Object.keys(nextErrors).length > 0) {
+      setSubmitted("");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const payload = await requestJson(apiEndpoints.authSignup, {
+        method: "POST",
+        body: JSON.stringify(form),
+      });
+
+      const user = payload.data?.user;
+      setSubmitted(`Account created successfully as ${user?.role || "user"}.`);
+      router.push(user?.role === "admin" ? appRoutes.admin : appRoutes.products);
+      router.refresh();
+    } catch (requestError) {
+      setErrors({
+        form: requestError.message || "Unable to create your account right now.",
+      });
+      setSubmitted("");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -105,14 +134,17 @@ export default function SignupPage() {
 
             <button
               type="submit"
+              disabled={submitting}
               className="mt-2 w-full rounded-[10px] bg-black px-6 py-3 text-[0.95rem] font-medium text-white transition-colors duration-200 hover:bg-[#1d1d1d]"
             >
-              Create Account
+              {submitting ? "Creating..." : "Create Account"}
             </button>
+
+            {errors.form ? <p className="text-[0.78rem] text-[#B42318]">{errors.form}</p> : null}
 
             {submitted ? (
               <p className="rounded-[10px] bg-[#EBF9F0] px-3 py-2 text-[0.82rem] text-[#067647]">
-                Form is valid and ready for backend signup integration.
+                {submitted}
               </p>
             ) : null}
           </form>

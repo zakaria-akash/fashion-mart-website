@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/shared/ProductCard";
-import { getWishlistIds, toggleWishlistId } from "@/lib/wishlistStorage";
+import { fetchWishlistProducts, toggleWishlistId } from "@/lib/wishlistStorage";
 
 function WishlistButton({ active, onToggle }) {
   return (
@@ -33,14 +33,48 @@ function InfoCard({ label, value }) {
 }
 
 export default function ProductDetailClientPage({ product, relatedProducts }) {
-  const [wishlistIds, setWishlistIds] = useState(() =>
-    typeof window === "undefined" ? [] : getWishlistIds()
-  );
+  const [wishlistIds, setWishlistIds] = useState([]);
+  const productSizes = Array.isArray(product.sizes) ? product.sizes : [];
+  const productColors = Array.isArray(product.colors) ? product.colors : [];
+  const productHighlights = Array.isArray(product.highlights) ? product.highlights : [];
+  const productDetails = Array.isArray(product.details) ? product.details : [];
+  const safeRelatedProducts = Array.isArray(relatedProducts) ? relatedProducts : [];
 
   const wished = wishlistIds.includes(product.id);
 
-  function handleWishlistToggle(productId) {
-    setWishlistIds(toggleWishlistId(productId));
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadWishlist() {
+      try {
+        const items = await fetchWishlistProducts();
+
+        if (!ignore) {
+          setWishlistIds(items.map((item) => item.id));
+        }
+      } catch {
+        if (!ignore) {
+          setWishlistIds([]);
+        }
+      }
+    }
+
+    loadWishlist();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  async function handleWishlistToggle(productId) {
+    try {
+      const nextWished = await toggleWishlistId(productId);
+      setWishlistIds((prev) =>
+        nextWished ? [...new Set([...prev, productId])] : prev.filter((item) => item !== productId)
+      );
+    } catch {
+      // Keep current detail state intact on failure.
+    }
   }
 
   return (
@@ -115,7 +149,7 @@ export default function ProductDetailClientPage({ product, relatedProducts }) {
                   Available sizes
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2.5">
-                  {product.sizes.map((size) => (
+                  {productSizes.map((size) => (
                     <span
                       key={size}
                       className="inline-flex min-w-12 justify-center rounded-full border border-black/10 bg-[#f8f8f8] px-4 py-2 text-[0.86rem] font-medium text-black"
@@ -131,7 +165,7 @@ export default function ProductDetailClientPage({ product, relatedProducts }) {
                   Color palette
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2.5">
-                  {product.colors.map((color) => (
+                  {productColors.map((color) => (
                     <span
                       key={color}
                       className="inline-flex rounded-full border border-black/10 px-4 py-2 text-[0.86rem] text-black/75"
@@ -147,7 +181,7 @@ export default function ProductDetailClientPage({ product, relatedProducts }) {
                   Why it stands out
                 </p>
                 <div className="mt-3 grid gap-3 sm:grid-cols-3">
-                  {product.highlights.map((highlight) => (
+                  {productHighlights.map((highlight) => (
                     <div
                       key={highlight}
                       className="rounded-[18px] bg-[#f4f6f5] px-4 py-4 text-[0.92rem] font-medium leading-[1.5] text-black"
@@ -174,7 +208,7 @@ export default function ProductDetailClientPage({ product, relatedProducts }) {
                 Product details
               </p>
               <div className="mt-4 space-y-3">
-                {product.details.map((detail) => (
+                {productDetails.map((detail) => (
                   <div key={detail} className="flex items-start gap-3">
                     <span className="mt-[0.45rem] h-2 w-2 rounded-full bg-[#e6c744]" />
                     <p className="text-[0.94rem] leading-[1.7] text-black/70">{detail}</p>
@@ -202,7 +236,7 @@ export default function ProductDetailClientPage({ product, relatedProducts }) {
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {relatedProducts.map((relatedProduct) => (
+          {safeRelatedProducts.map((relatedProduct) => (
             <ProductCard
               key={relatedProduct.id}
               product={relatedProduct}

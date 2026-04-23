@@ -1,24 +1,50 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import PageIntro from "@/components/shared/PageIntro";
 import ProductCard from "@/components/shared/ProductCard";
-import { mockProducts } from "@/lib/mockProducts";
-import { getWishlistIds, toggleWishlistId } from "@/lib/wishlistStorage";
+import { fetchWishlistProducts, removeWishlistId, toggleWishlistId } from "@/lib/wishlistStorage";
 
 export default function WishlistPage() {
-  const [wishlistIds, setWishlistIds] = useState(() =>
-    typeof window === "undefined" ? [] : getWishlistIds()
-  );
+  const [wishedProducts, setWishedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const wishedProducts = useMemo(
-    () => mockProducts.filter((product) => wishlistIds.includes(product.id)),
-    [wishlistIds]
-  );
+  useEffect(() => {
+    let ignore = false;
 
-  function handleWishlistToggle(productId) {
-    setWishlistIds(toggleWishlistId(productId));
+    async function loadWishlist() {
+      try {
+        const items = await fetchWishlistProducts();
+
+        if (!ignore) {
+          setWishedProducts(items);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadWishlist();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  async function handleWishlistToggle(productId) {
+    try {
+      const wished = await toggleWishlistId(productId);
+
+      if (!wished) {
+        setWishedProducts((prev) => prev.filter((product) => product.id !== productId));
+      }
+    } catch {
+      await removeWishlistId(productId);
+      setWishedProducts((prev) => prev.filter((product) => product.id !== productId));
+    }
   }
 
   return (
@@ -30,7 +56,16 @@ export default function WishlistPage() {
       />
 
       <section className="page-container">
-        {wishedProducts.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-[430px] animate-pulse rounded-[18px] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
+              />
+            ))}
+          </div>
+        ) : wishedProducts.length === 0 ? (
           <div className="rounded-[20px] bg-white px-6 py-10 text-center shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <h2 className="text-[1.3rem] font-medium text-black">Your wishlist is empty</h2>
             <p className="mt-2 text-[0.95rem] text-black/65">
@@ -49,7 +84,7 @@ export default function WishlistPage() {
               <ProductCard
                 key={product.id}
                 product={product}
-                wished={wishlistIds.includes(product.id)}
+                wished
                 onToggleWishlist={() => handleWishlistToggle(product.id)}
               />
             ))}

@@ -1,34 +1,99 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageIntro from "@/components/shared/PageIntro";
 import ProductCard from "@/components/shared/ProductCard";
-import { mockProducts, productCategories } from "@/lib/mockProducts";
-import { getWishlistIds, toggleWishlistId } from "@/lib/wishlistStorage";
+import { requestJson } from "@/lib/api/request";
+import { fetchWishlistProducts, toggleWishlistId } from "@/lib/wishlistStorage";
+
+const productCategories = ["all", "women", "men", "casual", "winter", "streetwear"];
 
 export default function ProductsClientPage({ initialCategory }) {
   const validInitialCategory = productCategories.includes(initialCategory) ? initialCategory : "all";
   const [manualCategory, setManualCategory] = useState(null);
   const [query, setQuery] = useState("");
-  const [wishlistIds, setWishlistIds] = useState(() =>
-    typeof window === "undefined" ? [] : getWishlistIds()
-  );
+  const [products, setProducts] = useState([]);
+  const [wishlistIds, setWishlistIds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const activeCategory = manualCategory ?? validInitialCategory;
 
-  const filteredProducts = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+  useEffect(() => {
+    let ignore = false;
 
-    return mockProducts.filter((product) => {
-      const categoryMatch = activeCategory === "all" || product.category === activeCategory;
-      const searchMatch =
-        normalizedQuery.length === 0 || product.title.toLowerCase().includes(normalizedQuery);
-      return categoryMatch && searchMatch;
-    });
+    async function loadProducts() {
+      setLoading(true);
+      setError("");
+
+      try {
+        const searchParams = new URLSearchParams();
+        if (activeCategory !== "all") {
+          searchParams.set("category", activeCategory);
+        }
+        if (query.trim()) {
+          searchParams.set("search", query.trim());
+        }
+
+        const payload = await requestJson(`/api/products?${searchParams.toString()}`);
+
+        if (!ignore) {
+          setProducts(payload.data ?? []);
+        }
+      } catch (requestError) {
+        if (!ignore) {
+          setError(requestError.message || "Unable to load products right now.");
+          setProducts([]);
+        }
+      } finally {
+        if (!ignore) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadProducts();
+
+    return () => {
+      ignore = true;
+    };
   }, [activeCategory, query]);
 
-  function handleWishlistToggle(productId) {
-    setWishlistIds(toggleWishlistId(productId));
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadWishlist() {
+      try {
+        const items = await fetchWishlistProducts();
+
+        if (!ignore) {
+          setWishlistIds(items.map((item) => item.id));
+        }
+      } catch {
+        if (!ignore) {
+          setWishlistIds([]);
+        }
+      }
+    }
+
+    loadWishlist();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const filteredProducts = useMemo(() => products, [products]);
+
+  async function handleWishlistToggle(productId) {
+    try {
+      const wished = await toggleWishlistId(productId);
+      setWishlistIds((prev) =>
+        wished ? [...new Set([...prev, productId])] : prev.filter((item) => item !== productId)
+      );
+    } catch {
+      // Keep the current UI stable if the request fails.
+    }
   }
 
   return (
@@ -76,18 +141,35 @@ export default function ProductsClientPage({ initialCategory }) {
           </div>
         </div>
 
-        <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              wished={wishlistIds.includes(product.id)}
-              onToggleWishlist={() => handleWishlistToggle(product.id)}
-            />
-          ))}
-        </div>
+        {error ? (
+          <p className="mt-8 rounded-[14px] bg-white px-5 py-6 text-center text-[0.95rem] text-[#B42318]">
+            {error}
+          </p>
+        ) : null}
 
-        {filteredProducts.length === 0 ? (
+        {loading ? (
+          <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-[430px] animate-pulse rounded-[18px] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.06)]"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                wished={wishlistIds.includes(product.id)}
+                onToggleWishlist={() => handleWishlistToggle(product.id)}
+              />
+            ))}
+          </div>
+        )}
+
+        {!loading && filteredProducts.length === 0 ? (
           <p className="mt-8 rounded-[14px] bg-white px-5 py-6 text-center text-[0.95rem] text-black/65">
             No products matched your filters.
           </p>

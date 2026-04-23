@@ -8,7 +8,7 @@ import { appRoutes } from "@/lib/config/routes";
 // Primary navigation entries based on design reference.
 const navItems = [
   { label: "CATALOGUE", href: appRoutes.products },
-  { label: "FASHION", href: `${appRoutes.products}?category=women` },
+  { label: "FASHION", href: appRoutes.fashion },
   { label: "FAVOURITE", href: appRoutes.wishlist },
   { label: "LIFESTYLE", href: appRoutes.lifestyle },
 ];
@@ -31,7 +31,7 @@ export default function Header() {
     // Sticky header across all breakpoints so it remains visible while scrolling.
     <header className="sticky top-0 z-[80] bg-[#f4f6f5]/95 backdrop-blur lg:bg-[#f4f6f5]/95 lg:backdrop-blur">
       {/* Desktop/mobile shared header row container. */}
-      <div className="mx-auto w-full max-w-[1320px] px-4 pt-5 sm:px-6 lg:px-10 lg:pt-8">
+      <div className="mx-auto w-full max-w-[1320px] px-4 pb-3 pt-5 sm:px-6 sm:pb-3.5 lg:px-10 lg:pb-5 lg:pt-8">
         <div className="flex items-center justify-between">
           {/* Brand logo block (left side). */}
           <Link href={appRoutes.home} className="flex items-center">
@@ -40,7 +40,7 @@ export default function Header() {
               alt="Fashion Mart"
               width={237}
               height={60}
-              className="h-5 w-auto sm:h-6"
+              className="h-6 w-auto sm:h-7 lg:h-8 xl:h-9"
               priority
             />
           </Link>
@@ -116,7 +116,7 @@ export default function Header() {
             : "pointer-events-none -translate-y-2 opacity-0"
         }`}
       >
-        <nav className="mx-auto w-full max-w-[1320px] rounded-[10px] bg-white/95 px-4 py-3 shadow-[0_14px_36px_rgba(0,0,0,0.12)] backdrop-blur">
+        <nav className="mx-auto w-full max-w-[1320px] rounded-[10px] bg-white/95 px-4 pb-4 pt-3 shadow-[0_14px_36px_rgba(0,0,0,0.12)] backdrop-blur sm:pb-5">
           <div className="flex flex-col gap-2.5">
             {navItems.map((item) => (
               <Link
@@ -134,7 +134,7 @@ export default function Header() {
           <Link
             href={appRoutes.login}
             onClick={() => setMenuOpen(false)}
-            className="mt-3 w-full rounded-[8px] bg-black px-7 py-3 text-[1rem] font-light !text-white"
+            className="mt-4 block w-full rounded-[8px] bg-black px-7 py-3 text-center text-[1rem] font-light !text-white"
           >
             Login
           </Link>

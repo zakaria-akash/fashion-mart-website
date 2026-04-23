@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import ProductDetailClientPage from "@/components/products/ProductDetailClientPage";
-import { getProductById, getRelatedProducts } from "@/lib/mockProducts";
+import { getProductById, getRelatedProducts } from "@/lib/products";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { productId } = await params;
-  const product = getProductById(productId);
+  const product = await getProductById(productId);
 
   if (!product) {
     return {
@@ -20,13 +22,18 @@ export async function generateMetadata({ params }) {
 
 export default async function ProductDetailPage({ params }) {
   const { productId } = await params;
-  const product = getProductById(productId);
+  const product = await getProductById(productId);
 
   if (!product) {
     notFound();
   }
 
-  const relatedProducts = getRelatedProducts(product.id, product.category);
+  const relatedProducts = await getRelatedProducts(product.id, product.category);
 
-  return <ProductDetailClientPage product={product} relatedProducts={relatedProducts} />;
+  return (
+    <ProductDetailClientPage
+      product={product}
+      relatedProducts={Array.isArray(relatedProducts) ? relatedProducts : []}
+    />
+  );
 }
