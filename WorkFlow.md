@@ -24,6 +24,7 @@ Establish requirement clarity, implementation constraints, and execution standar
 - Finalize coding and delivery conventions.
 - Confirm backend direction: MongoDB plus GridFS.
 - Confirm data sourcing strategy: DummyJSON as seed source, MongoDB as runtime source of truth.
+- Confirm mandatory feature set: auth, product browsing, wishlist, and admin product management.
 - Confirm motion direction: subtle, elegant, professional animation.
 - Prepare preliminary risks, assumptions, and dependencies list.
 
@@ -57,6 +58,8 @@ Build the technical foundation that supports scalable UI composition, backend co
 - Configure MongoDB connection and environment strategy.
 - Define GridFS media flow and retrieval approach.
 - Define DummyJSON-to-internal schema mapping and upsert strategy.
+- Define auth/session strategy and role model (user/admin).
+- Define route structure for browse, wishlist, auth pages, and admin pages.
 
 ### Phase1 Deliverables
 
@@ -64,6 +67,7 @@ Build the technical foundation that supports scalable UI composition, backend co
 - Shared UI token foundation and base styles.
 - Backend connectivity scaffolding with placeholder interfaces.
 - Source ingestion contract for DummyJSON normalization.
+- Auth and role-based access contract.
 
 ### Phase1 Exit Criteria
 
@@ -89,6 +93,10 @@ Implement complete page sections with high visual fidelity and stable responsive
   - App download section
   - Newsletter section
   - Footer
+- Build auth UI pages: signup and login.
+- Build product browse UI with category filtering.
+- Build wishlist UI states and interaction controls.
+- Build basic admin panel UI for product add and listing management.
 - Integrate image assets with consistent naming and sizing strategy.
 - Ensure layout integrity across target breakpoints.
 - Apply semantic markup and accessibility baseline.
@@ -97,6 +105,7 @@ Implement complete page sections with high visual fidelity and stable responsive
 
 - Full static-to-structured UI that matches references closely.
 - Responsive layouts for desktop, tablet, and mobile.
+- Static-first UI flows for auth, browse, wishlist, and admin screens.
 
 ### Phase2 Exit Criteria
 
@@ -113,13 +122,15 @@ Connect UI to production-like data and complete required backend capabilities.
 ### Phase3 Key Activities
 
 - Implement products API endpoint.
+- Implement auth endpoints (signup/login) and session handling.
 - Implement newsletter endpoint with robust validation.
 - Implement admin-safe sync endpoint to import products from DummyJSON.
 - Implement GridFS file streaming endpoint.
 - Wire frontend sections to API responses.
 - Seed and upsert initial product records from DummyJSON into MongoDB.
 - Store product images in GridFS and map file identifiers in product records.
-- Implement optional favourites persistence if included in scope.
+- Implement wishlist persistence and endpoints.
+- Implement admin product CRUD endpoints with authorization.
 
 ### Phase3 Deliverables
 
@@ -127,12 +138,16 @@ Connect UI to production-like data and complete required backend capabilities.
 - Stable API response shapes documented and verified.
 - Working file delivery pipeline via GridFS.
 - Repeatable external-source sync flow with deterministic upsert behavior.
+- Functional auth, browse, wishlist, and admin flows connected end to end.
 
 ### Phase3 Exit Criteria
 
 - New Arrivals and related UI sections consume backend data correctly.
 - Newsletter flow handles success and failure states correctly.
 - Product data is served from internal MongoDB endpoints, not direct DummyJSON calls.
+- Signup/login flow is functional and validated.
+- Wishlist mark/unmark and persistence are functional.
+- Admin product add/manage flows are functional.
 - No critical integration defect remains open.
 
 ## Phase4: Motion Polish, QA Hardening, and Optimization

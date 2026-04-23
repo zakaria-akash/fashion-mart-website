@@ -10,6 +10,10 @@ Define a minimal, production-minded backend plan that satisfies the required tas
 
 1. Newsletter and email capture with robust validation.
 2. Product data served from API with no hardcoded product UI data.
+3. User authentication (signup and login).
+4. Product browsing API with category-based filtering.
+5. Wishlist persistence for mark and unmark favourite actions.
+6. Basic admin product management (add and manage listings).
 
 ### Optional but Recommended
 
@@ -69,6 +73,16 @@ For this project scope, Next.js with MongoDB and GridFS is the default recommend
 - session_id or user_id: string (required, indexed)
 - created_at: timestamp
 
+### Collection: users
+
+- _id: ObjectId (primary key)
+- name: string (required)
+- email: string (required, unique index)
+- password_hash: string (required)
+- role: string (enum: user, admin)
+- created_at: timestamp
+- updated_at: timestamp
+
 ### GridFS Buckets
 
 - product_images: product and card visuals
@@ -87,6 +101,7 @@ Query parameters (optional):
 - category
 - limit
 - sort
+- search
 
 Notes:
 
@@ -115,6 +130,37 @@ Success response example:
   "inserted": 12,
   "updated": 18,
   "imagesStored": 30
+}
+```
+
+### POST /api/auth/signup
+
+Purpose:
+
+- Register a new user account.
+
+Request body:
+
+```json
+{
+  "name": "Jane Doe",
+  "email": "jane@example.com",
+  "password": "strong-password"
+}
+```
+
+### POST /api/auth/login
+
+Purpose:
+
+- Authenticate an existing user and create a session/token.
+
+Request body:
+
+```json
+{
+  "email": "jane@example.com",
+  "password": "strong-password"
 }
 ```
 
@@ -200,6 +246,13 @@ Error response example:
 - POST /api/favourites
 - DELETE /api/favourites/:itemId
 
+### Admin Product Management Endpoints
+
+- POST /api/admin/products
+- PUT /api/admin/products/:id
+- DELETE /api/admin/products/:id
+- GET /api/admin/products
+
 If backend persistence is postponed, a localStorage fallback is acceptable for MVP.
 
 ## Validation and Security
@@ -212,6 +265,8 @@ If backend persistence is postponed, a localStorage fallback is acceptable for M
 6. Validate ObjectId parameters before database calls.
 7. Restrict upload MIME types and file size for GridFS.
 8. Protect sync endpoint with admin secret or internal-only access.
+9. Hash passwords using a strong algorithm (bcrypt/argon2).
+10. Enforce admin authorization on all admin product endpoints.
 
 ## Environment Variables
 
@@ -222,6 +277,7 @@ If backend persistence is postponed, a localStorage fallback is acceptable for M
 - NEXT_PUBLIC_API_BASE_URL (only when frontend and API are split)
 - DUMMYJSON_BASE_URL
 - PRODUCT_SYNC_ADMIN_TOKEN
+- AUTH_JWT_SECRET
 
 ## Error Handling Standard
 
@@ -245,11 +301,19 @@ Return structured JSON errors with predictable shape.
 - Files endpoint returns not found for invalid or missing ids.
 - Sync endpoint upserts DummyJSON items without creating duplicates.
 - Sync endpoint handles source downtime and partial failures safely.
+- Signup endpoint validates input and prevents duplicate email registration.
+- Login endpoint validates credentials and returns session/token.
+- Wishlist endpoints support mark and unmark flows correctly.
+- Admin product endpoints enforce authorization and perform CRUD correctly.
 
 ### Integration Checks
 
 - New Arrivals UI renders API response correctly.
 - Newsletter UI handles success and error responses correctly.
+- Auth UI integrates with signup/login APIs.
+- Product browsing UI reads category-filtered product data.
+- Wishlist UI reflects saved favourites state.
+- Admin panel can create and manage products end to end.
 
 ## Deployment Notes
 
@@ -262,8 +326,11 @@ Return structured JSON errors with predictable shape.
 ## Definition of Done
 
 1. Products endpoint provides stable UI-ready data.
-2. Newsletter endpoint stores validated emails.
-3. Favourites persistence works or localStorage fallback is documented.
-4. Error responses follow the standard shape.
-5. DummyJSON-to-MongoDB sync pipeline is implemented and documented.
-6. Basic endpoint tests or validation scripts pass.
+2. Signup and login endpoints are functional and secure.
+3. Product browsing supports category filtering and search.
+4. Favourites persistence supports mark and unmark flows.
+5. Admin panel backend endpoints support product CRUD with authorization.
+6. Newsletter endpoint stores validated emails.
+7. Error responses follow the standard shape.
+8. DummyJSON-to-MongoDB sync pipeline is implemented and documented.
+9. Basic endpoint tests or validation scripts pass.

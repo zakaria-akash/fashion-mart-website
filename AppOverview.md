@@ -38,9 +38,12 @@ The application is a fashion-commerce style landing page with the following key 
 
 1. Pixel-accurate layout reproduction for desktop and mobile references
 2. Product content rendered from API data (not hardcoded) using DummyJSON as initial seed source
-3. Newsletter email submission to backend with strict validation
-4. Optional favourites/wishlist interaction with persisted state
-5. Slight, elegant, and professional motion across key UI components
+3. User authentication flow (Sign up and Login)
+4. Product browsing experience with category-wise listing and product information
+5. Wishlist interaction (mark and unmark favourite products) with persisted state
+6. Basic admin panel to add products and manage product listings
+7. Newsletter email submission to backend with strict validation
+8. Slight, elegant, and professional motion across key UI components
 
 ## Design Direction (From Provided Assets)
 
@@ -57,8 +60,9 @@ The application is a fashion-commerce style landing page with the following key 
 2. Spacing, type hierarchy, and section order match expected structure
 3. Site remains responsive and stable across standard breakpoints
 4. Backend-dependent features function correctly with clean data flow
-5. Subtle animations improve polish without hurting readability or performance
-6. Codebase is modular and straightforward to maintain
+5. Authentication, product browsing, wishlist, and admin product management are fully functional
+6. Subtle animations improve polish without hurting readability or performance
+7. Codebase is modular and straightforward to maintain
 
 ## Constraints and Notes
 
@@ -71,7 +75,6 @@ The application is a fashion-commerce style landing page with the following key 
 ## Out of Scope for Initial Build
 
 - Full e-commerce cart/checkout flows
-- User authentication system
 - CMS integration
 - Complex analytics/event pipeline
 
@@ -80,6 +83,10 @@ The application is a fashion-commerce style landing page with the following key 
 - Section inventory finalized
 - Design tokens finalized
 - API contracts finalized
+- Auth flow contracts finalized (signup and login)
+- Product browsing and category filtering contracts finalized
+- Wishlist data contract and persistence strategy finalized
+- Admin panel product CRUD scope finalized
 - Source-to-database mapping finalized (DummyJSON fields to internal product schema)
 - Animation tokens and motion rules finalized
 - Folder structure and conventions finalized

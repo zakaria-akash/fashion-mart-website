@@ -15,6 +15,13 @@ Use slight, elegant, professional animation across key components. Motion should
 - Image handling: next/image for optimized loading
 - State: React state for local interactions and API-driven content from internal backend endpoints
 
+## Feature Modules (Mandatory)
+
+- Authentication: signup and login screens with validation feedback
+- Product Browsing: category-aware product listing and filtering UI
+- Wishlist: mark and unmark favourites from product cards and persist state
+- Admin Panel: product management screens to add and maintain listings
+
 ## Data Source Strategy
 
 - Seed source: DummyJSON Products API (import/sync only)
@@ -72,6 +79,10 @@ Define these before implementation starts.
 1. App Download Promo
 1. Newsletter CTA
 1. Footer
+1. Authentication Pages (Sign up and Login)
+1. Product Browsing Page (catalog and category filters)
+1. Wishlist Page (favourite products)
+1. Admin Panel (add product and manage listings)
 
 ## Component Breakdown
 
@@ -84,6 +95,11 @@ Define these before implementation starts.
 - App Download Section: copy, store badges, device mockup
 - Newsletter Section: heading, subtitle, email form
 - Footer: brand block, social icons, link columns
+- Auth Form: reusable input and submit states for signup/login
+- Product Grid: reusable card list for category-based browsing
+- Wishlist Toggle: reusable favourite control with active/inactive states
+- Admin Product Form: product create/update form with validation
+- Admin Product Table/List: manage existing product records
 
 ## Animation Plan by Section
 
@@ -131,6 +147,7 @@ Expected behavior.
 1. Semantic landmarks: header, main, section, footer.
 1. Meaningful alt text for informative images.
 1. Explicit label association for newsletter input.
+1. Explicit labels and error messaging for auth and admin forms.
 
 ## Performance Baseline
 
@@ -148,6 +165,10 @@ Expected behavior.
 - prefers-reduced-motion behavior verified
 - Product content is API-driven and not hardcoded
 - Product cards are rendered from internal MongoDB-backed APIs, not third-party endpoints
+- Signup and login flows are implemented with clear validation states
+- Product browsing supports category-wise exploration
+- Wishlist mark/unmark behavior is functional and persisted
+- Admin panel can add products and manage listings
 - Newsletter form maps to backend contract
 - No material image-driven layout shift
 - Core performance and accessibility quality checks completed
