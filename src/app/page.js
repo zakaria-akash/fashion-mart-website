@@ -1,5 +1,7 @@
 import Header from "@/components/home/Header";
+import DownloadAppSection from "@/components/home/DownloadAppSection";
 import HeroSection from "@/components/home/HeroSection";
+import JoinShoppingCommunitySection from "@/components/home/JoinShoppingCommunitySection";
 import NewArrivalSection from "@/components/home/NewArrivalSection";
 import PayDaySaleSection from "@/components/home/PayDaySaleSection";
 import PartnerBrandsSlider from "@/components/home/PartnerBrandsSlider";
@@ -26,6 +28,12 @@ export default function Home() {
 
       {/* Young's Favourite cards section */}
       <YoungsFavouriteSection />
+
+      {/* Download app promotional section */}
+      <DownloadAppSection />
+
+      {/* Join shopping community email capture section */}
+      <JoinShoppingCommunitySection />
     </main>
   );
 }
