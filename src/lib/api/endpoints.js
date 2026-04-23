@@ -3,6 +3,8 @@ export const apiEndpoints = {
   authLogin: "/api/auth/login",
   authMe: "/api/auth/me",
   authLogout: "/api/auth/logout",
+  authVerifyEmail: "/api/auth/verify-email",
+  authResendVerification: "/api/auth/resend-verification",
   products: "/api/products",
   wishlist: "/api/wishlist",
   adminProducts: "/api/admin/products",

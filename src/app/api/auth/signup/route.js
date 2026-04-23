@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
 import { errorResponse, successResponse } from "@/lib/api-response";
 import { connectToDatabase } from "@/lib/db";
-import { hashPassword, setAuthCookie, GUEST_COOKIE_NAME } from "@/lib/auth";
+import { hashPassword, GUEST_COOKIE_NAME } from "@/lib/auth";
+import { buildVerificationUrl, createVerificationToken, sendVerificationEmail } from "@/lib/email";
 import { formatZodError, signupSchema } from "@/lib/validation";
 import { mergeWishlistToUser } from "@/lib/products";
 import { serverEnv } from "@/lib/env";
@@ -30,47 +31,94 @@ export async function POST(request) {
     }
 
     const { name, email, password } = parsed.data;
-    const existingUser = await User.findOne({ email }).lean();
+    const existingUser = await User.findOne({ email });
 
     if (existingUser) {
+      if (!existingUser.emailVerified) {
+        const verification = createVerificationToken();
+        existingUser.name = name;
+        existingUser.passwordHash = await hashPassword(password);
+        existingUser.emailVerificationTokenHash = verification.tokenHash;
+        existingUser.emailVerificationExpiresAt = verification.expiresAt;
+        await existingUser.save();
+
+        const origin = new URL(request.url).origin;
+        const verificationUrl = buildVerificationUrl({
+          email,
+          token: verification.token,
+          origin,
+        });
+        const delivery = await sendVerificationEmail({
+          email,
+          name,
+          verificationUrl,
+        });
+
+        return successResponse({
+          message: "This account already exists but is not verified yet. A fresh verification email has been sent.",
+          data: {
+            user: {
+              id: String(existingUser._id),
+              name: existingUser.name,
+              email: existingUser.email,
+              role: existingUser.role,
+              emailVerified: existingUser.emailVerified,
+            },
+            verificationRequired: true,
+            delivery,
+          },
+        });
+      }
+
       return errorResponse("EMAIL_IN_USE", "An account with this email already exists.", 409);
     }
 
     const role = await resolveUserRole(email);
     const passwordHash = await hashPassword(password);
+    const verification = createVerificationToken();
     const user = await User.create({
       name,
       email,
       passwordHash,
       role,
+      emailVerified: false,
+      emailVerificationTokenHash: verification.tokenHash,
+      emailVerificationExpiresAt: verification.expiresAt,
     });
 
     const cookieStore = await cookies();
     const guestSessionId = cookieStore.get(GUEST_COOKIE_NAME)?.value;
     await mergeWishlistToUser(guestSessionId, user._id);
 
-    const response = successResponse(
+    const origin = new URL(request.url).origin;
+    const verificationUrl = buildVerificationUrl({
+      email,
+      token: verification.token,
+      origin,
+    });
+    const delivery = await sendVerificationEmail({
+      email,
+      name,
+      verificationUrl,
+    });
+
+    return successResponse(
       {
+        message: "Verification email sent. Please approve your account before logging in.",
         data: {
           user: {
             id: String(user._id),
             name: user.name,
             email: user.email,
             role: user.role,
+            emailVerified: user.emailVerified,
           },
+          verificationRequired: true,
+          delivery,
         },
       },
       { status: 201 }
     );
-
-    await setAuthCookie(response, {
-      id: String(user._id),
-      name: user.name,
-      email: user.email,
-      role: user.role,
-    });
-
-    return response;
   } catch (error) {
     return errorResponse("SIGNUP_FAILED", error.message, 500);
   }

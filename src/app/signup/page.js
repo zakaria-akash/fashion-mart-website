@@ -2,18 +2,20 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import PageIntro from "@/components/shared/PageIntro";
 import { appRoutes } from "@/lib/config/routes";
 import { apiEndpoints } from "@/lib/api/endpoints";
 import { requestJson } from "@/lib/api/request";
+import { useToast } from "@/components/providers/ToastProvider";
 
 export default function SignupPage() {
-  const router = useRouter();
+  const { showToast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [verificationPreview, setVerificationPreview] = useState("");
+  const [deliveryMode, setDeliveryMode] = useState("");
 
   function validate(nextForm) {
     const nextErrors = {};
@@ -37,9 +39,13 @@ export default function SignupPage() {
     event.preventDefault();
     const nextErrors = validate(form);
     setErrors(nextErrors);
+    setVerificationPreview("");
 
     if (Object.keys(nextErrors).length > 0) {
-      setSubmitted("");
+      showToast("Please correct the highlighted signup fields.", {
+        tone: "error",
+        label: "Signup failed",
+      });
       return;
     }
 
@@ -50,15 +56,23 @@ export default function SignupPage() {
         body: JSON.stringify(form),
       });
 
-      const user = payload.data?.user;
-      setSubmitted(`Account created successfully as ${user?.role || "user"}.`);
-      router.push(user?.role === "admin" ? appRoutes.admin : appRoutes.products);
-      router.refresh();
-    } catch (requestError) {
-      setErrors({
-        form: requestError.message || "Unable to create your account right now.",
+      setForm({ name: "", email: "", password: "" });
+      setErrors({});
+      setVerificationPreview(payload.data?.delivery?.previewUrl || "");
+      setDeliveryMode(payload.data?.delivery?.mode || "");
+      showToast(payload.message || "Verification email sent.", {
+        label: "Signup successful",
       });
-      setSubmitted("");
+    } catch (requestError) {
+      const nextMessage = requestError.message || "Unable to create your account right now.";
+      setErrors({
+        form: nextMessage,
+      });
+      setDeliveryMode("");
+      showToast(nextMessage, {
+        tone: "error",
+        label: "Signup failed",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -118,12 +132,24 @@ export default function SignupPage() {
             </div>
 
             <div>
-              <label htmlFor="password" className="text-[0.84rem] font-medium uppercase tracking-[0.1em] text-black/60">
-                Password
-              </label>
+              <div className="flex items-center justify-between gap-3">
+                <label
+                  htmlFor="password"
+                  className="text-[0.84rem] font-medium uppercase tracking-[0.1em] text-black/60"
+                >
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="text-[0.76rem] font-medium uppercase tracking-[0.08em] text-black/55 transition-opacity duration-200 hover:opacity-70"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
               <input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={form.password}
                 onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
                 className="mt-2 w-full rounded-[10px] border border-black/15 px-4 py-3 text-[0.95rem] outline-none transition-colors duration-200 focus:border-black"
@@ -135,17 +161,29 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="mt-2 w-full rounded-[10px] bg-black px-6 py-3 text-[0.95rem] font-medium text-white transition-colors duration-200 hover:bg-[#1d1d1d]"
+              className="mt-2 w-full rounded-[10px] bg-black px-6 py-3 text-[0.95rem] font-medium text-white transition-colors duration-200 hover:bg-[#1d1d1d] disabled:opacity-70"
             >
               {submitting ? "Creating..." : "Create Account"}
             </button>
 
             {errors.form ? <p className="text-[0.78rem] text-[#B42318]">{errors.form}</p> : null}
 
-            {submitted ? (
-              <p className="rounded-[10px] bg-[#EBF9F0] px-3 py-2 text-[0.82rem] text-[#067647]">
-                {submitted}
-              </p>
+            {verificationPreview ? (
+              <div className="rounded-[12px] bg-[#f6f7f8] px-4 py-3 text-[0.84rem] leading-[1.6] text-black/70">
+                Development preview link:
+                <a
+                  href={verificationPreview}
+                  className="ml-2 font-medium text-black underline underline-offset-2"
+                >
+                  Verify account
+                </a>
+              </div>
+            ) : null}
+
+            {deliveryMode === "smtp" ? (
+              <div className="rounded-[12px] bg-[#f5fbf7] px-4 py-3 text-[0.84rem] leading-[1.6] text-[#166534]">
+                Verification email was sent through real SMTP delivery. If it is not in your inbox, check Spam or Promotions.
+              </div>
             ) : null}
           </form>
 

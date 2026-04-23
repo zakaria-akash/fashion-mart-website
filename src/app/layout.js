@@ -1,6 +1,8 @@
 import "./globals.css";
 import AppFooter from "@/components/home/AppFooter";
 import Header from "@/components/home/Header";
+import { AuthProvider } from "@/components/providers/AuthProvider";
+import { ToastProvider } from "@/components/providers/ToastProvider";
 import { Poppins } from "next/font/google";
 
 // Global font configuration used across the full application.
@@ -25,14 +27,18 @@ export default function RootLayout({ children }) {
     <html lang="en" className="h-full antialiased">
       {/* Global font class is attached to body so all content inherits Poppins. */}
       <body className={`${poppins.className} min-h-full`}>
-        {/* App-wide header shared by all pages. */}
-        <Header />
+        <ToastProvider>
+          <AuthProvider>
+            {/* App-wide header shared by all pages. */}
+            <Header />
 
-        {/* Current route content. */}
-        {children}
+            {/* Current route content. */}
+            {children}
 
-        {/* App-wide footer shared by all pages. */}
-        <AppFooter />
+            {/* App-wide footer shared by all pages. */}
+            <AppFooter />
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

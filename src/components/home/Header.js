@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { appRoutes } from "@/lib/config/routes";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 
 // Primary navigation entries based on design reference.
 const navItems = [
@@ -15,6 +18,9 @@ const navItems = [
 
 export default function Header() {
   // Controls mobile navigation overlay visibility.
+  const router = useRouter();
+  const { user, loading, logout } = useAuth();
+  const { showToast } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -26,6 +32,23 @@ export default function Header() {
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
+
+  async function handleLogout() {
+    try {
+      await logout();
+      setMenuOpen(false);
+      showToast("You have been logged out successfully.", {
+        label: "Signed out",
+      });
+      router.push(appRoutes.home);
+      router.refresh();
+    } catch {
+      showToast("Unable to log out right now. Please try again.", {
+        tone: "error",
+        label: "Logout failed",
+      });
+    }
+  }
 
   return (
     // Sticky header across all breakpoints so it remains visible while scrolling.
@@ -60,12 +83,26 @@ export default function Header() {
             </nav>
 
             {/* Desktop login action. */}
-            <Link
-              href={appRoutes.login}
-              className="rounded-[8px] bg-black px-7 py-3 text-[1rem] font-light !text-white transition-colors duration-200 hover:bg-[#1d1d1d] xl:px-8 xl:py-3.5"
-            >
-              Login
-            </Link>
+            {loading ? (
+              <span className="rounded-[8px] bg-black/10 px-7 py-3 text-[1rem] font-light text-black/60 xl:px-8 xl:py-3.5">
+                Loading...
+              </span>
+            ) : user ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-[8px] bg-black px-7 py-3 text-[1rem] font-light !text-white transition-colors duration-200 hover:bg-[#1d1d1d] xl:px-8 xl:py-3.5"
+              >
+                Log Out
+              </button>
+            ) : (
+              <Link
+                href={appRoutes.login}
+                className="rounded-[8px] bg-black px-7 py-3 text-[1rem] font-light !text-white transition-colors duration-200 hover:bg-[#1d1d1d] xl:px-8 xl:py-3.5"
+              >
+                Login
+              </Link>
+            )}
           </div>
 
           {/* Mobile hamburger trigger with animated lines. */}
@@ -130,14 +167,30 @@ export default function Header() {
             ))}
           </div>
 
-          {/* Mobile login action. */}
-          <Link
-            href={appRoutes.login}
-            onClick={() => setMenuOpen(false)}
-            className="mt-4 block w-full rounded-[8px] bg-black px-7 py-3 text-center text-[1rem] font-light !text-white"
-          >
-            Login
-          </Link>
+          <div className="mt-4">
+            {user ? (
+              <div className="space-y-2">
+                <p className="text-[0.82rem] font-medium uppercase tracking-[0.08em] text-black/55">
+                  Signed in as {user.name}
+                </p>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="block w-full rounded-[8px] bg-black px-7 py-3 text-center text-[1rem] font-light !text-white"
+                >
+                  Log Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href={appRoutes.login}
+                onClick={() => setMenuOpen(false)}
+                className="block w-full rounded-[8px] bg-black px-7 py-3 text-center text-[1rem] font-light !text-white"
+              >
+                Login
+              </Link>
+            )}
+          </div>
         </nav>
       </div>
     </header>

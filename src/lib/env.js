@@ -20,8 +20,15 @@ export const serverEnv = {
   dummyJsonBaseUrl: getEnv("DUMMYJSON_BASE_URL", "https://dummyjson.com"),
   productSyncAdminToken: getEnv("PRODUCT_SYNC_ADMIN_TOKEN", "fashion-mart-sync-token"),
   authJwtSecret: getEnv("AUTH_JWT_SECRET", "fashion-mart-dev-secret-change-me"),
+  appBaseUrl: getEnv("APP_BASE_URL", "http://localhost:3000"),
   adminEmails: getEnv("ADMIN_EMAILS", "admin@fashionmart.com")
     .split(",")
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean),
+  smtpHost: getEnv("SMTP_HOST"),
+  smtpPort: Number(getEnv("SMTP_PORT", "587")),
+  smtpUser: getEnv("SMTP_USER"),
+  smtpPass: getEnv("SMTP_PASS"),
+  smtpFromEmail: getEnv("SMTP_FROM_EMAIL", "no-reply@fashionmart.local"),
+  smtpFromName: getEnv("SMTP_FROM_NAME", "Fashion Mart"),
 };

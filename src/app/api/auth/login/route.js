@@ -29,11 +29,28 @@ export async function POST(request) {
       return errorResponse("INVALID_CREDENTIALS", "Invalid email or password.", 401);
     }
 
+    if (!user.emailVerified) {
+      return errorResponse(
+        "EMAIL_NOT_VERIFIED",
+        "Verify your email before logging in.",
+        403,
+        [{ field: "email", message: "Your account is waiting for email verification." }]
+      );
+    }
+
     const passwordMatches = await verifyPassword(password, user.passwordHash);
 
     if (!passwordMatches) {
+      user.failedLoginAttempts = (user.failedLoginAttempts ?? 0) + 1;
+      user.lastFailedLoginAt = new Date();
+      await user.save();
       return errorResponse("INVALID_CREDENTIALS", "Invalid email or password.", 401);
     }
+
+    user.failedLoginAttempts = 0;
+    user.lastFailedLoginAt = null;
+    user.lastLoginAt = new Date();
+    await user.save();
 
     const cookieStore = await cookies();
     const guestSessionId = cookieStore.get(GUEST_COOKIE_NAME)?.value;
@@ -46,6 +63,8 @@ export async function POST(request) {
           name: user.name,
           email: user.email,
           role: user.role,
+          emailVerified: user.emailVerified,
+          lastLoginAt: user.lastLoginAt,
         },
       },
     });
