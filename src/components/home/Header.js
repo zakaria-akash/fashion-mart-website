@@ -8,7 +8,7 @@ import { appRoutes } from "@/lib/config/routes";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 
-// Primary navigation entries based on design reference.
+// Primary navigation links for the main site menu
 const navItems = [
   { label: "CATALOGUE", href: appRoutes.products },
   { label: "FASHION", href: appRoutes.fashion },
@@ -16,23 +16,28 @@ const navItems = [
   { label: "LIFESTYLE", href: appRoutes.lifestyle },
 ];
 
+/**
+ * Header Component
+ * Persistent navigation bar featuring brand identity, menu links, and authentication controls.
+ * Supports mobile responsive menu with animated hamburger trigger.
+ */
 export default function Header() {
-  // Controls mobile navigation overlay visibility.
   const router = useRouter();
   const { user, loading, logout } = useAuth();
   const { showToast } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Sync scroll lock with mobile menu state
   useEffect(() => {
-    // Prevent background scrolling while mobile menu overlay is open.
     document.body.style.overflow = menuOpen ? "hidden" : "";
-
     return () => {
-      // Always restore scrolling if component unmounts.
       document.body.style.overflow = "";
     };
   }, [menuOpen]);
 
+  /**
+   * Performs user logout and provides feedback via toasts.
+   */
   async function handleLogout() {
     try {
       await logout();
@@ -51,12 +56,11 @@ export default function Header() {
   }
 
   return (
-    // Sticky header across all breakpoints so it remains visible while scrolling.
     <header className="sticky top-0 z-[80] bg-[#f4f6f5]/95 backdrop-blur lg:bg-[#f4f6f5]/95 lg:backdrop-blur">
-      {/* Desktop/mobile shared header row container. */}
       <div className="mx-auto w-full max-w-[1320px] px-4 pb-3 pt-5 sm:px-6 sm:pb-3.5 lg:px-10 lg:pb-5 lg:pt-8">
         <div className="flex items-center justify-between">
-          {/* Brand logo block (left side). */}
+          
+          {/* Logo / Home Link */}
           <Link href={appRoutes.home} className="flex items-center">
             <Image
               src="/images/company-logo.png"
@@ -68,7 +72,7 @@ export default function Header() {
             />
           </Link>
 
-          {/* Desktop-only nav + CTA group. */}
+          {/* Desktop Navigation and Actions */}
           <div className="hidden items-center gap-9 lg:flex xl:gap-12">
             <nav className="flex items-center gap-9 xl:gap-12">
               {navItems.map((item) => (
@@ -82,7 +86,7 @@ export default function Header() {
               ))}
             </nav>
 
-            {/* Desktop login action. */}
+            {/* Auth State Handling */}
             {loading ? (
               <span className="rounded-[8px] bg-black/10 px-7 py-3 text-[1rem] font-light text-black/60 xl:px-8 xl:py-3.5">
                 Loading...
@@ -105,7 +109,7 @@ export default function Header() {
             )}
           </div>
 
-          {/* Mobile hamburger trigger with animated lines. */}
+          {/* Mobile Menu Hamburger Trigger */}
           <button
             type="button"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -114,44 +118,22 @@ export default function Header() {
             className="flex h-8 w-8 items-center justify-center lg:hidden"
           >
             <span className="relative block h-3.5 w-4.5">
-              {/* Top line */}
-              <span
-                className={`absolute left-0 top-0 block h-[1.5px] w-full bg-black transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                  menuOpen ? "translate-y-[6px] rotate-45" : ""
-                }`}
-              />
-              {/* Middle line fades out when open */}
-              <span
-                className={`absolute left-0 top-1/2 block h-[1.5px] w-full -translate-y-1/2 bg-black transition-opacity duration-200 ${
-                  menuOpen ? "opacity-0" : "opacity-100"
-                }`}
-              />
-              {/* Bottom line */}
-              <span
-                className={`absolute left-0 bottom-0 block h-[1.5px] w-full bg-black transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                  menuOpen ? "-translate-y-[6px] -rotate-45" : ""
-                }`}
-              />
+              <span className={`absolute left-0 top-0 block h-[1.5px] w-full bg-black transition-transform duration-300 ${menuOpen ? "translate-y-[6px] rotate-45" : ""}`} />
+              <span className={`absolute left-0 top-1/2 block h-[1.5px] w-full -translate-y-1/2 bg-black transition-opacity duration-200 ${menuOpen ? "opacity-0" : "opacity-100"}`} />
+              <span className={`absolute left-0 bottom-0 block h-[1.5px] w-full bg-black transition-transform duration-300 ${menuOpen ? "-translate-y-[6px] -rotate-45" : ""}`} />
             </span>
           </button>
         </div>
       </div>
 
-      {/* Dimmed backdrop behind mobile menu; click to close. */}
+      {/* Mobile Menu Overlay and Backdrop */}
       <div
-        className={`fixed inset-0 z-[60] bg-black/10 transition-opacity duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden ${
-          menuOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 z-[60] bg-black/10 transition-opacity duration-300 lg:hidden ${menuOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={() => setMenuOpen(false)}
       />
 
-      {/* Floating mobile menu panel rendered above page content. */}
       <div
-        className={`fixed inset-x-0 top-[58px] z-[70] px-4 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:px-6 lg:hidden ${
-          menuOpen
-            ? "pointer-events-auto translate-y-0 opacity-100"
-            : "pointer-events-none -translate-y-2 opacity-0"
-        }`}
+        className={`fixed inset-x-0 top-[58px] z-[70] px-4 transition-all duration-300 lg:hidden ${menuOpen ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"}`}
       >
         <nav className="mx-auto w-full max-w-[1320px] rounded-[10px] bg-white/95 px-4 pb-4 pt-3 shadow-[0_14px_36px_rgba(0,0,0,0.12)] backdrop-blur sm:pb-5">
           <div className="flex flex-col gap-2.5">

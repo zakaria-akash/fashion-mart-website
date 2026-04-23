@@ -3,6 +3,7 @@ import Link from "next/link";
 import PageIntro from "@/components/shared/PageIntro";
 import { appRoutes } from "@/lib/config/routes";
 
+// Core brand values or style tips
 const stylePillars = [
   {
     title: "Capsule Wardrobe",
@@ -18,6 +19,7 @@ const stylePillars = [
   },
 ];
 
+// Stylized lookbook entries
 const trendingLooks = [
   {
     title: "City Minimal",
@@ -36,6 +38,11 @@ const trendingLooks = [
   },
 ];
 
+/**
+ * LifestylePage Component
+ * Provides editorial content and styling inspiration.
+ * Combines high-impact imagery with text-based style guides.
+ */
 export default function LifestylePage() {
   return (
     <main className="page-shell pb-16">
@@ -45,6 +52,7 @@ export default function LifestylePage() {
         description="Discover curated fashion habits, practical styling ideas, and everyday wardrobe inspiration designed around the Fashion Mart look and feel."
       />
 
+      {/* Primary Editorial Highlight */}
       <section className="page-container">
         <div className="rounded-[24px] bg-[linear-gradient(135deg,#111_0%,#2a2a2a_100%)] p-6 text-white shadow-[0_18px_48px_rgba(0,0,0,0.18)] sm:p-8 lg:p-10">
           <p className="text-[0.82rem] font-medium uppercase tracking-[0.12em] text-white/70">Editorial Pick</p>
@@ -73,6 +81,7 @@ export default function LifestylePage() {
         </div>
       </section>
 
+      {/* Style Pillars Grid */}
       <section className="page-container mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
         {stylePillars.map((pillar) => (
           <article
@@ -85,6 +94,7 @@ export default function LifestylePage() {
         ))}
       </section>
 
+      {/* Lookbook / Trending Gallery */}
       <section className="page-container mt-9">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-[1.45rem] font-black uppercase tracking-[0.02em] text-black sm:text-[1.75rem]">

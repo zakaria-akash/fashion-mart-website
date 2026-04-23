@@ -5,6 +5,9 @@ import { WishlistEntry } from "@/models/WishlistEntry";
 import { connectToDatabase, getGridFSBucket } from "@/lib/db";
 import { serverEnv } from "@/lib/env";
 
+/**
+ * Mapping from DummyJSON categories to internal Fashion Mart categories.
+ */
 const FASHION_CATEGORY_MAP = {
   tops: "casual",
   "womens-dresses": "women",
@@ -34,6 +37,9 @@ const COLOR_PRESETS = {
   streetwear: ["Charcoal", "Clay", "White"],
 };
 
+/**
+ * Converts a string into a URL-friendly slug.
+ */
 function slugify(value) {
   return value
     .toLowerCase()
@@ -41,14 +47,23 @@ function slugify(value) {
     .replace(/^-+|-+$/g, "");
 }
 
+/**
+ * Resolves the internal category for a given source category.
+ */
 function getCategoryFromSource(sourceCategory) {
   return FASHION_CATEGORY_MAP[sourceCategory] ?? "casual";
 }
 
+/**
+ * Generates a marketing tagline for a product.
+ */
 function createTagline(product) {
   return `${product.brand || "Fashion Mart"} style with an elevated ${product.category} edge.`;
 }
 
+/**
+ * Determines the accent label based on product metrics.
+ */
 function createAccent(product) {
   if (product.rating >= 4.8) {
     return "Top rated";
@@ -61,6 +76,9 @@ function createAccent(product) {
   return product.discountPercentage >= 10 ? "Editor pick" : "New arrival";
 }
 
+/**
+ * Generates product highlights based on category and rating.
+ */
 function createHighlights(product, category) {
   const categoryHighlight =
     category === "women"
@@ -80,6 +98,9 @@ function createHighlights(product, category) {
   ];
 }
 
+/**
+ * Generates technical details for a product.
+ */
 function createDetails(product) {
   return [
     product.description,
@@ -88,10 +109,16 @@ function createDetails(product) {
   ];
 }
 
+/**
+ * Resolves the color palette for a given category.
+ */
 function createColors(category) {
   return COLOR_PRESETS[category] ?? ["Black", "White", "Stone"];
 }
 
+/**
+ * Normalizes a raw DummyJSON product into the internal schema.
+ */
 function buildProductPayload(sourceProduct, indexOffset = 0) {
   const category = getCategoryFromSource(sourceProduct.category);
   const slug = slugify(sourceProduct.title);
@@ -120,6 +147,9 @@ function buildProductPayload(sourceProduct, indexOffset = 0) {
   };
 }
 
+/**
+ * Fetches products from DummyJSON across multiple relevant categories.
+ */
 async function fetchDummyJsonFashionProducts() {
   const requests = FASHION_SOURCE_CATEGORIES.map((category) =>
     fetch(`${serverEnv.dummyJsonBaseUrl}/products/category/${category}?limit=6`)
@@ -137,6 +167,9 @@ async function fetchDummyJsonFashionProducts() {
   return payloads.flatMap((payload) => payload.products ?? []);
 }
 
+/**
+ * Deletes a file from GridFS by its identifier.
+ */
 async function deleteExistingGridFile(fileId) {
   if (!fileId) {
     return;
@@ -150,6 +183,9 @@ async function deleteExistingGridFile(fileId) {
   }
 }
 
+/**
+ * Downloads a remote image and uploads it to GridFS storage.
+ */
 async function uploadImageToGridFS(imageUrl, filename) {
   if (!imageUrl) {
     return null;
@@ -179,6 +215,9 @@ async function uploadImageToGridFS(imageUrl, filename) {
   });
 }
 
+/**
+ * Manages product image storage, updating GridFS if the URL has changed.
+ */
 export async function storeProductImageFromUrl(imageUrl, slug, existingFileId = null) {
   if (!imageUrl) {
     return {
@@ -199,6 +238,9 @@ export async function storeProductImageFromUrl(imageUrl, slug, existingFileId = 
   };
 }
 
+/**
+ * Formats a raw Mongoose product document into a UI-ready JSON object.
+ */
 export function serializeProduct(product) {
   const category = product.category || "casual";
   const fallbackDescription = product.description || "A polished Fashion Mart piece for modern everyday wear.";
@@ -238,6 +280,9 @@ export function serializeProduct(product) {
   };
 }
 
+/**
+ * Ensures the database has initial product data by triggering a sync if empty.
+ */
 export async function ensureProductsSeeded() {
   await connectToDatabase();
   const count = await Product.countDocuments();
@@ -258,6 +303,10 @@ export async function ensureProductsSeeded() {
   await globalThis.__fashionMartSeedPromise;
 }
 
+/**
+ * Lists products from MongoDB based on various filter and sort criteria.
+ * Automatically seeds the database if no products exist.
+ */
 export async function listProducts({
   category = "all",
   search = "",
@@ -315,6 +364,9 @@ export async function listProducts({
   return items.map(serializeProduct);
 }
 
+/**
+ * Retrieves a single product by its MongoDB identifier.
+ */
 export async function getProductById(productId) {
   await connectToDatabase();
   await ensureProductsSeeded();
@@ -327,6 +379,9 @@ export async function getProductById(productId) {
   return product ? serializeProduct(product) : null;
 }
 
+/**
+ * Retrieves products related to a specific product, prioritizing same-category items.
+ */
 export async function getRelatedProducts(productId, category, limit = 3) {
   await connectToDatabase();
   await ensureProductsSeeded();
@@ -354,6 +409,9 @@ export async function getRelatedProducts(productId, category, limit = 3) {
   return [...related, ...fallback].map(serializeProduct);
 }
 
+/**
+ * Merges a guest wishlist into a user's account upon login or signup.
+ */
 export async function mergeWishlistToUser(sessionId, userId) {
   if (!sessionId || !userId) {
     return;
@@ -383,6 +441,10 @@ export async function mergeWishlistToUser(sessionId, userId) {
   await WishlistEntry.deleteMany({ sessionId });
 }
 
+/**
+ * Core synchronization logic that pulls data from DummyJSON and stores it in MongoDB.
+ * Optionally downloads and stores images in GridFS for internal delivery.
+ */
 export async function syncDummyJsonProducts({
   dryRun = false,
   storeImages = true,

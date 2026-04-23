@@ -1,3 +1,7 @@
+/**
+ * Constant definitions for all internal API endpoints.
+ * Used by client-side components to interact with Next.js route handlers.
+ */
 export const apiEndpoints = {
   authSignup: "/api/auth/signup",
   authLogin: "/api/auth/login",

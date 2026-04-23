@@ -5,6 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { requestJson } from "@/lib/api/request";
 
+/**
+ * ArrowIcon Sub-component
+ * SVG arrow used for card directional cues.
+ */
 function ArrowIcon() {
   return (
     <svg
@@ -28,10 +32,16 @@ function ArrowIcon() {
   );
 }
 
+/**
+ * NewArrivalSection Component
+ * Displays a curated list of the latest products.
+ * Fetches data dynamically from the products API.
+ */
 export default function NewArrivalSection() {
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
 
+  // Load featured products on mount
   useEffect(() => {
     let ignore = false;
 
@@ -58,6 +68,7 @@ export default function NewArrivalSection() {
 
   return (
     <section className="mx-auto w-full max-w-[1320px] px-4 pb-12 pt-8 sm:px-6 sm:pb-14 sm:pt-10 lg:px-10 lg:pb-20 lg:pt-14">
+      {/* Section Headline with accent block */}
       <div className="relative inline-block">
         <h2 className="relative z-[1] text-[1.5rem] font-black uppercase leading-[1.1] tracking-[0.02em] text-black">
           NEW ARRIVALS
@@ -65,13 +76,16 @@ export default function NewArrivalSection() {
         <span className="absolute -bottom-[2px] left-[58px] z-0 block h-[11px] w-[95px] rounded-[999px] bg-[#ebd96b]" />
       </div>
 
+      {/* Error Feedback */}
       {error ? (
         <p className="mt-6 rounded-[14px] bg-white px-5 py-4 text-[0.95rem] text-[#B42318]">{error}</p>
       ) : null}
 
+      {/* Arrival Cards Grid */}
       <div className="mt-6 grid grid-cols-1 gap-7 sm:mt-8 sm:gap-9 lg:mt-11 lg:grid-cols-3 lg:gap-8">
         {items.map((item) => (
           <Link key={item.id} href={`/products/${item.id}`} className="group">
+            {/* Card visual with zoom-on-hover effect */}
             <div className="overflow-hidden rounded-[14px] sm:rounded-[16px]">
               <Image
                 src={item.image}
@@ -82,6 +96,7 @@ export default function NewArrivalSection() {
               />
             </div>
 
+            {/* Metadata and navigational cue */}
             <div className="mt-3 flex items-end justify-between gap-4 sm:mt-4">
               <div>
                 <h3 className="text-[1rem] font-medium leading-[1.25] text-[#191919]">{item.title}</h3>

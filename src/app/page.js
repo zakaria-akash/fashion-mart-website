@@ -6,29 +6,33 @@ import PayDaySaleSection from "@/components/home/PayDaySaleSection";
 import PartnerBrandsSlider from "@/components/home/PartnerBrandsSlider";
 import YoungsFavouriteSection from "@/components/home/YoungsFavouriteSection";
 
+/**
+ * Home Page (Server Component)
+ * Assembles the primary marketing sections into a single-page scrolling experience.
+ * Shared site shell (Header/Footer) is managed by the root layout.
+ */
 export default function Home() {
   return (
-    // Home page content only; shared shell (header/footer) is handled in layout.
     <main className="min-h-screen bg-[#f4f6f5] text-black">
-      {/* Hero banner section with heading, CTA, and hero artwork */}
+      {/* High-impact hero entry point */}
       <HeroSection />
 
-      {/* Partner/brand logos strip below hero */}
+      {/* High-contrast partner brand strip */}
       <PartnerBrandsSlider />
 
-      {/* New arrivals cards section */}
+      {/* Dynamic new product showcase */}
       <NewArrivalSection />
 
-      {/* Pay day sale promotional section */}
+      {/* Secondary promotional banner */}
       <PayDaySaleSection />
 
-      {/* Young's Favourite cards section */}
+      {/* Curated lifestyle highlight section */}
       <YoungsFavouriteSection />
 
-      {/* Download app promotional section */}
+      {/* Mobile application promotion */}
       <DownloadAppSection />
 
-      {/* Join shopping community email capture section */}
+      {/* Newsletter / Community engagement area */}
       <JoinShoppingCommunitySection />
     </main>
   );

@@ -8,6 +8,10 @@ import ProductCard from "@/components/shared/ProductCard";
 import { fetchWishlistProducts, toggleWishlistId } from "@/lib/wishlistStorage";
 import { appRoutes } from "@/lib/config/routes";
 
+/**
+ * MetricCard Sub-component
+ * Stylized info card for displaying key fashion metrics.
+ */
 function MetricCard({ label, value }) {
   return (
     <div className="rounded-[18px] border border-black/8 bg-white px-4 py-4 shadow-[0_10px_28px_rgba(0,0,0,0.05)]">
@@ -17,6 +21,11 @@ function MetricCard({ label, value }) {
   );
 }
 
+/**
+ * FashionClientPage Component
+ * Provides a curated editorial layout for specific categories.
+ * Features a hero spotlight and two categorized product grids.
+ */
 export default function FashionClientPage({
   heroProduct,
   womenEditProducts,
@@ -25,20 +34,18 @@ export default function FashionClientPage({
 }) {
   const [wishlistIds, setWishlistIds] = useState([]);
 
+  // Fetch wishlist state on component mount
   useEffect(() => {
     let ignore = false;
 
     async function loadWishlist() {
       try {
         const items = await fetchWishlistProducts();
-
         if (!ignore) {
           setWishlistIds(items.map((item) => item.id));
         }
       } catch {
-        if (!ignore) {
-          setWishlistIds([]);
-        }
+        if (!ignore) setWishlistIds([]);
       }
     }
 
@@ -49,6 +56,9 @@ export default function FashionClientPage({
     };
   }, []);
 
+  /**
+   * Toggles product in/out of the user wishlist and updates local state.
+   */
   async function handleWishlistToggle(productId) {
     try {
       const wished = await toggleWishlistId(productId);
@@ -56,7 +66,7 @@ export default function FashionClientPage({
         wished ? [...new Set([...prev, productId])] : prev.filter((item) => item !== productId)
       );
     } catch {
-      // Preserve the current page state if the network request fails.
+      // Best-effort update, preserve UI if the request fails.
     }
   }
 
@@ -68,8 +78,11 @@ export default function FashionClientPage({
         description="A more directional view of the catalogue, built from Mongo-backed DummyJSON imports and arranged into an easy, editorial browsing experience."
       />
 
+      {/* Hero Spotlight Section */}
       <section className="page-container">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.92fr)]">
+          
+          {/* Editorial Content Block */}
           <div className="relative overflow-hidden rounded-[30px] bg-[linear-gradient(135deg,#111_0%,#2a2a2a_45%,#3c3725_100%)] p-6 text-white shadow-[0_20px_56px_rgba(0,0,0,0.18)] sm:p-8 lg:p-10">
             <div className="relative z-10 max-w-[540px]">
               <p className="text-[0.8rem] font-medium uppercase tracking-[0.14em] text-white/70">Fashion Journal</p>
@@ -96,6 +109,7 @@ export default function FashionClientPage({
                 </Link>
               </div>
 
+              {/* Data metrics display */}
               <div className="mt-7 grid gap-3 sm:grid-cols-3">
                 <MetricCard label="Fashion items" value={`${totalFashionItems}+`} />
                 <MetricCard label="Top focus" value="Women + Streetwear" />
@@ -104,6 +118,7 @@ export default function FashionClientPage({
             </div>
           </div>
 
+          {/* Hero Visual Spotlight */}
           <div className="overflow-hidden rounded-[30px] bg-white p-4 shadow-[0_18px_44px_rgba(0,0,0,0.08)] sm:p-5">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-[#f1f1f1]">
               {heroProduct ? (
@@ -133,6 +148,7 @@ export default function FashionClientPage({
         </div>
       </section>
 
+      {/* Categorized Edits Section */}
       <section className="page-container mt-10">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>

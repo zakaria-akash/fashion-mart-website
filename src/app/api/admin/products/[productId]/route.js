@@ -8,6 +8,9 @@ import { Product } from "@/models/Product";
 
 export const runtime = "nodejs";
 
+/**
+ * Ensures the requester has an active admin session.
+ */
 async function requireAdmin() {
   const session = await getCurrentSession();
 
@@ -18,6 +21,10 @@ async function requireAdmin() {
   return session;
 }
 
+/**
+ * PUT /api/admin/products/[productId]
+ * Updates an existing product. Manages GridFS image updates if a new URL is provided.
+ */
 export async function PUT(request, { params }) {
   try {
     await connectToDatabase();
@@ -46,6 +53,7 @@ export async function PUT(request, { params }) {
       return errorResponse("PRODUCT_NOT_FOUND", "Product not found.", 404);
     }
 
+    // Update image storage if a new URL is provided, otherwise keep existing
     const imageState = parsed.data.imageUrl
       ? await storeProductImageFromUrl(parsed.data.imageUrl, existing.slug, existing.imageFileId)
       : {
@@ -84,6 +92,10 @@ export async function PUT(request, { params }) {
   }
 }
 
+/**
+ * DELETE /api/admin/products/[productId]
+ * Permanently removes a product from the database.
+ */
 export async function DELETE(_request, { params }) {
   try {
     await connectToDatabase();

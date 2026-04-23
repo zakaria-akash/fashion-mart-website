@@ -5,6 +5,11 @@ import { User } from "@/models/User";
 
 export const runtime = "nodejs";
 
+/**
+ * GET /api/auth/me
+ * Retrieves the profile of the currently authenticated user.
+ * Returns null user data if no active session exists.
+ */
 export async function GET() {
   try {
     await connectToDatabase();
@@ -18,6 +23,7 @@ export async function GET() {
       });
     }
 
+    // Refresh user data from database to ensure up-to-date roles/status
     const user = await User.findById(session.sub).lean();
 
     if (!user) {

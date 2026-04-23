@@ -7,6 +7,9 @@ import { Product } from "@/models/Product";
 
 export const runtime = "nodejs";
 
+/**
+ * Middleware-like helper to enforce admin session requirements.
+ */
 async function requireAdmin() {
   const session = await getCurrentSession();
 
@@ -17,10 +20,14 @@ async function requireAdmin() {
   return session;
 }
 
+/**
+ * Constructs a normalized product payload for admin-created items.
+ */
 function buildAdminProductPayload(input) {
   return {
     source: "internal",
     sourceId: null,
+    // Generate a unique slug using title and timestamp
     slug: `${input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}-${Date.now()}`,
     title: input.title,
     tagline: `${input.brand || "Fashion Mart"} edit for elevated everyday styling.`,
@@ -33,18 +40,22 @@ function buildAdminProductPayload(input) {
     sizes: ["S", "M", "L", "XL"],
     colors: ["Black", "Stone", "White"],
     highlights: ["Fresh admin drop", "Responsive catalogue ready", "Premium styling direction"],
-      details: [
-        input.description,
-        "Added from the Fashion Mart admin panel.",
-        "Available immediately across catalogue flows.",
-      ],
-      imageUrlFallback: "",
-      imageAlt: input.title,
-      featuredHome: false,
-      featuredFavourite: false,
+    details: [
+      input.description,
+      "Added from the Fashion Mart admin panel.",
+      "Available immediately across catalogue flows.",
+    ],
+    imageUrlFallback: "",
+    imageAlt: input.title,
+    featuredHome: false,
+    featuredFavourite: false,
   };
 }
 
+/**
+ * GET /api/admin/products
+ * Retrieves all products with admin-level detail, sorted by newest.
+ */
 export async function GET() {
   try {
     await connectToDatabase();
@@ -67,6 +78,10 @@ export async function GET() {
   }
 }
 
+/**
+ * POST /api/admin/products
+ * Creates a new product record. Handles image uploads to GridFS if a URL is provided.
+ */
 export async function POST(request) {
   try {
     await connectToDatabase();
@@ -79,11 +94,14 @@ export async function POST(request) {
     const json = await request.json();
     const parsed = adminProductSchema.safeParse(json);
 
+    // Validate input against the admin product schema
     if (!parsed.success) {
       return errorResponse("INVALID_INPUT", "Please fix the highlighted fields.", 400, formatZodError(parsed.error));
     }
 
     const payload = buildAdminProductPayload(parsed.data);
+    
+    // Process external image URL and store in internal GridFS if possible
     const imageState = parsed.data.imageUrl
       ? await storeProductImageFromUrl(parsed.data.imageUrl, payload.slug)
       : {

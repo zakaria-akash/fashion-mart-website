@@ -1,5 +1,6 @@
 import Image from "next/image";
 
+// Marketing social links for footer engagement
 const socialIcons = [
   { src: "/images/Social-Media-Icons/facebook-icon.png", alt: "Facebook" },
   { src: "/images/Social-Media-Icons/instagram-icon.png", alt: "Instagram" },
@@ -7,6 +8,7 @@ const socialIcons = [
   { src: "/images/Social-Media-Icons/linkedin-icon.png", alt: "LinkedIn" },
 ];
 
+// Structural link columns for site navigation
 const footerColumns = [
   {
     title: "Company",
@@ -35,21 +37,27 @@ const footerColumns = [
   },
 ];
 
+/**
+ * AppFooter Component
+ * Standard site footer with brand identity, social links, and categorized navigation.
+ * Uses high-contrast black background with muted text as per design requirements.
+ */
 export default function AppFooter() {
   return (
-    // Footer block at the bottom of the page as in the reference layouts.
     <footer className="motion-fade-in w-full bg-black">
-      {/* Main footer body with responsive brand + columns arrangement. */}
       <div className="mx-auto w-full max-w-[1320px] px-4 pb-10 pt-10 sm:px-6 lg:px-10 lg:pb-14 lg:pt-14">
         <div className="grid grid-cols-1 gap-9 lg:grid-cols-[1.05fr_1.95fr] lg:gap-20">
-        {/* Brand and social area. */}
+          
+          {/* Brand Identity and Social Block */}
           <div>
-            <h2 className="text-[2em] font-black leading-[1.5] tracking-[0.03em] text-white sm:text-[2.2em] lg:text-[2.5em]">Fashion</h2>
+            <h2 className="text-[2em] font-black leading-[1.5] tracking-[0.03em] text-white sm:text-[2.2em] lg:text-[2.5em]">
+              Fashion
+            </h2>
             <p className="mt-2 max-w-[270px] text-[0.68em] font-normal leading-[1.5] tracking-[0.03em] text-[#8A8A8A] sm:text-[0.72em] lg:text-[0.75em]">
               Complete your style with awesome clothes from us.
             </p>
 
-            {/* Social icons: 32x32, 10px gap, 5px radius as requested. */}
+            {/* Social Icon Row - Fixed sizes and rounded corners per reference */}
             <div className="mt-5 flex items-center gap-[10px]">
               {socialIcons.map((icon) => (
                 <a
@@ -70,7 +78,7 @@ export default function AppFooter() {
             </div>
           </div>
 
-          {/* Footer navigation columns. */}
+          {/* Structured Link Columns */}
           <div className="grid grid-cols-3 gap-3 sm:gap-5 lg:gap-6">
             {footerColumns.map((column) => (
               <div key={column.title}>
@@ -95,7 +103,7 @@ export default function AppFooter() {
         </div>
       </div>
 
-      {/* Bottom copyright strip with matching muted text style. */}
+      {/* Copyright strip with low-emphasis styling */}
       <div className="border-t border-white/10 px-4 py-3 sm:px-6 lg:px-10">
         <p className="text-center text-[0.68em] font-normal leading-[1.5] tracking-[0.03em] text-[#8A8A8A] sm:text-[0.72em] lg:text-[0.75em]">
           Copyright 2026 Fashion. All rights reserved.

@@ -5,6 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { requestJson } from "@/lib/api/request";
 
+/**
+ * ArrowIcon Sub-component
+ * SVG arrow used for card directional cues.
+ */
 function ArrowIcon() {
   return (
     <svg
@@ -28,9 +32,15 @@ function ArrowIcon() {
   );
 }
 
+/**
+ * YoungsFavouriteSection Component
+ * Curated product highlights for younger demographics.
+ * Dynamically fetches 'favourite' tagged products from the API.
+ */
 export default function YoungsFavouriteSection() {
   const [items, setItems] = useState([]);
 
+  // Fetch curated items on mount
   useEffect(() => {
     let ignore = false;
 
@@ -57,6 +67,7 @@ export default function YoungsFavouriteSection() {
 
   return (
     <section className="mx-auto w-full max-w-[1320px] px-4 pb-14 pt-10 sm:px-6 sm:pb-16 sm:pt-12 lg:px-10 lg:pb-24 lg:pt-18">
+      {/* Section Title with accent block */}
       <div className="relative inline-block">
         <h2 className="relative z-[1] text-[1.5rem] font-black leading-[1.1] tracking-[0.01em] text-black">
           Young&apos;s Favourite
@@ -64,9 +75,11 @@ export default function YoungsFavouriteSection() {
         <span className="absolute -bottom-[2px] right-[2px] z-0 block h-[10px] w-[92px] rounded-[999px] bg-[#ebd96b]" />
       </div>
 
+      {/* Grid of featured favourite items */}
       <div className="mt-6 grid grid-cols-1 gap-7 sm:mt-8 sm:gap-9 lg:mt-11 lg:grid-cols-2 lg:gap-8">
         {items.map((item) => (
           <Link key={item.id} href={`/products/${item.id}`} className="group">
+            {/* Card image with hover effects */}
             <div className="overflow-hidden rounded-[14px] sm:rounded-[16px]">
               <Image
                 src={item.image}
@@ -77,6 +90,7 @@ export default function YoungsFavouriteSection() {
               />
             </div>
 
+            {/* Content metadata row */}
             <div className="mt-3 flex items-end justify-between gap-4 sm:mt-4">
               <div>
                 <h3 className="text-[1rem] font-medium leading-[1.25] text-[#191919]">{item.title}</h3>

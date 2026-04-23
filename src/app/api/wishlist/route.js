@@ -11,6 +11,10 @@ import { WishlistEntry } from "@/models/WishlistEntry";
 
 export const runtime = "nodejs";
 
+/**
+ * Resolves the query filter and session status for wishlist operations.
+ * Supports both authenticated user IDs and anonymous guest session IDs.
+ */
 async function getWishlistOwner(request) {
   const session = await getCurrentSession();
 
@@ -31,12 +35,20 @@ async function getWishlistOwner(request) {
   };
 }
 
+/**
+ * GET /api/wishlist
+ * Retrieves the full list of products currently saved in the requester's wishlist.
+ */
 export async function GET(request) {
   try {
     await connectToDatabase();
     const owner = await getWishlistOwner(request);
+    
+    // Find all entries for this owner
     const entries = await WishlistEntry.find(owner.query).sort({ createdAt: -1 }).lean();
     const productIds = entries.map((entry) => String(entry.productId));
+    
+    // Populate product details for the UI
     const products = productIds.length ? await listProducts({ ids: productIds }) : [];
 
     const response = successResponse({
@@ -46,6 +58,7 @@ export async function GET(request) {
       },
     });
 
+    // Ensure guest cookie is set if this is a new anonymous session
     if (owner.shouldSetCookie) {
       attachGuestCookie(response, owner.sessionId);
     }
@@ -56,6 +69,10 @@ export async function GET(request) {
   }
 }
 
+/**
+ * POST /api/wishlist
+ * Toggles a product's presence in the requester's wishlist (Add if missing, Remove if exists).
+ */
 export async function POST(request) {
   try {
     await connectToDatabase();
@@ -74,6 +91,7 @@ export async function POST(request) {
     const existing = await WishlistEntry.findOne(filter).lean();
     let wished;
 
+    // Toggle logic
     if (existing) {
       await WishlistEntry.deleteOne({ _id: existing._id });
       wished = false;
@@ -94,6 +112,7 @@ export async function POST(request) {
 
     return response;
   } catch (error) {
+    // Handle race conditions for concurrent adds gracefully
     if (error?.code === 11000) {
       return successResponse({
         data: {

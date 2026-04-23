@@ -1,3 +1,6 @@
+/**
+ * Product Categories available in the storefront.
+ */
 export const productCategories = [
   "all",
   "women",
@@ -7,6 +10,10 @@ export const productCategories = [
   "streetwear",
 ];
 
+/**
+ * Static fallback products used for development or UI scaffolding.
+ * Matches the structure of the internal Product model.
+ */
 export const mockProducts = [
   {
     id: "p1",
@@ -25,7 +32,7 @@ export const mockProducts = [
     details: [
       "Dropped shoulders for a roomy and modern fit.",
       "Ribbed cuffs and hem to keep structure through everyday wear.",
-      "Double-layer hood with clean finishing details.",
+      "Double-layer hoodie with clean finishing details.",
     ],
   },
   {
@@ -170,10 +177,16 @@ export const mockProducts = [
   },
 ];
 
+/**
+ * Retrieves a mock product by its identifier.
+ */
 export function getProductById(productId) {
   return mockProducts.find((product) => product.id === productId);
 }
 
+/**
+ * Retrieves mock products related to a specific product.
+ */
 export function getRelatedProducts(productId, category, limit = 3) {
   const sameCategory = mockProducts.filter(
     (product) => product.id !== productId && product.category === category

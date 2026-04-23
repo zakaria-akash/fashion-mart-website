@@ -6,17 +6,22 @@ import PageIntro from "@/components/shared/PageIntro";
 import ProductCard from "@/components/shared/ProductCard";
 import { fetchWishlistProducts, removeWishlistId, toggleWishlistId } from "@/lib/wishlistStorage";
 
+/**
+ * WishlistPage Component
+ * Displays a personalized collection of products saved by the user or guest.
+ * Allows items to be removed directly from the grid.
+ */
 export default function WishlistPage() {
   const [wishedProducts, setWishedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Load wishlist items on component mount
   useEffect(() => {
     let ignore = false;
 
     async function loadWishlist() {
       try {
         const items = await fetchWishlistProducts();
-
         if (!ignore) {
           setWishedProducts(items);
         }
@@ -34,14 +39,19 @@ export default function WishlistPage() {
     };
   }, []);
 
+  /**
+   * Toggles product in/out of the wishlist and refreshes local UI.
+   */
   async function handleWishlistToggle(productId) {
     try {
       const wished = await toggleWishlistId(productId);
-
+      
+      // If no longer wished, remove from the current grid view
       if (!wished) {
         setWishedProducts((prev) => prev.filter((product) => product.id !== productId));
       }
     } catch {
+      // Fallback cleanup if toggle fails
       await removeWishlistId(productId);
       setWishedProducts((prev) => prev.filter((product) => product.id !== productId));
     }
@@ -56,6 +66,7 @@ export default function WishlistPage() {
       />
 
       <section className="page-container">
+        {/* Loading Indicator */}
         {loading ? (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 3 }).map((_, index) => (
@@ -65,7 +76,8 @@ export default function WishlistPage() {
               />
             ))}
           </div>
-        ) : wishedProducts.length === 0 ? (
+        ) : /* Empty State */
+        wishedProducts.length === 0 ? (
           <div className="rounded-[20px] bg-white px-6 py-10 text-center shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <h2 className="text-[1.3rem] font-medium text-black">Your wishlist is empty</h2>
             <p className="mt-2 text-[0.95rem] text-black/65">
@@ -79,6 +91,7 @@ export default function WishlistPage() {
             </Link>
           </div>
         ) : (
+          /* Wishlist Product Grid */
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {wishedProducts.map((product) => (
               <ProductCard

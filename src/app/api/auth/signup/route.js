@@ -10,6 +10,10 @@ import { User } from "@/models/User";
 
 export const runtime = "nodejs";
 
+/**
+ * Determines the role for a new user.
+ * The first user in the database or emails listed in ADMIN_EMAILS get the 'admin' role.
+ */
 async function resolveUserRole(email) {
   const totalUsers = await User.countDocuments();
 
@@ -20,6 +24,10 @@ async function resolveUserRole(email) {
   return "user";
 }
 
+/**
+ * POST /api/auth/signup
+ * Handles new user registration, role assignment, and initial verification email delivery.
+ */
 export async function POST(request) {
   try {
     await connectToDatabase();
@@ -33,7 +41,9 @@ export async function POST(request) {
     const { name, email, password } = parsed.data;
     const existingUser = await User.findOne({ email });
 
+    // Handle existing accounts
     if (existingUser) {
+      // If found but unverified, update details and resend the link
       if (!existingUser.emailVerified) {
         const verification = createVerificationToken();
         existingUser.name = name;
@@ -73,6 +83,7 @@ export async function POST(request) {
       return errorResponse("EMAIL_IN_USE", "An account with this email already exists.", 409);
     }
 
+    // Create a new user record
     const role = await resolveUserRole(email);
     const passwordHash = await hashPassword(password);
     const verification = createVerificationToken();
@@ -86,10 +97,12 @@ export async function POST(request) {
       emailVerificationExpiresAt: verification.expiresAt,
     });
 
+    // Attempt to merge any existing guest wishlist into the new account
     const cookieStore = await cookies();
     const guestSessionId = cookieStore.get(GUEST_COOKIE_NAME)?.value;
     await mergeWishlistToUser(guestSessionId, user._id);
 
+    // Build and send verification email
     const origin = new URL(request.url).origin;
     const verificationUrl = buildVerificationUrl({
       email,

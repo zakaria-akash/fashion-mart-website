@@ -6,10 +6,19 @@ import ProductCard from "@/components/shared/ProductCard";
 import { requestJson } from "@/lib/api/request";
 import { fetchWishlistProducts, toggleWishlistId } from "@/lib/wishlistStorage";
 
+// Available filtering categories
 const productCategories = ["all", "women", "men", "casual", "winter", "streetwear"];
 
+/**
+ * ProductsClientPage Component
+ * Provides a searchable, filterable grid for the full product catalogue.
+ * Supports category selection and real-time text search.
+ */
 export default function ProductsClientPage({ initialCategory }) {
+  // Determine starting category from props or default to 'all'
   const validInitialCategory = productCategories.includes(initialCategory) ? initialCategory : "all";
+  
+  // State for active filters and search
   const [manualCategory, setManualCategory] = useState(null);
   const [query, setQuery] = useState("");
   const [products, setProducts] = useState([]);
@@ -19,6 +28,9 @@ export default function ProductsClientPage({ initialCategory }) {
 
   const activeCategory = manualCategory ?? validInitialCategory;
 
+  /**
+   * Loads product data from the API based on current category and search query.
+   */
   useEffect(() => {
     let ignore = false;
 
@@ -59,20 +71,20 @@ export default function ProductsClientPage({ initialCategory }) {
     };
   }, [activeCategory, query]);
 
+  /**
+   * Loads current wishlist state for heart indicator styling.
+   */
   useEffect(() => {
     let ignore = false;
 
     async function loadWishlist() {
       try {
         const items = await fetchWishlistProducts();
-
         if (!ignore) {
           setWishlistIds(items.map((item) => item.id));
         }
       } catch {
-        if (!ignore) {
-          setWishlistIds([]);
-        }
+        if (!ignore) setWishlistIds([]);
       }
     }
 
@@ -83,8 +95,12 @@ export default function ProductsClientPage({ initialCategory }) {
     };
   }, []);
 
+  // Memoized product list for efficient rendering
   const filteredProducts = useMemo(() => products, [products]);
 
+  /**
+   * Toggles product in/out of the user wishlist.
+   */
   async function handleWishlistToggle(productId) {
     try {
       const wished = await toggleWishlistId(productId);
@@ -92,7 +108,7 @@ export default function ProductsClientPage({ initialCategory }) {
         wished ? [...new Set([...prev, productId])] : prev.filter((item) => item !== productId)
       );
     } catch {
-      // Keep the current UI stable if the request fails.
+      // Keep UI stable if the request fails.
     }
   }
 
@@ -105,8 +121,12 @@ export default function ProductsClientPage({ initialCategory }) {
       />
 
       <section className="page-container">
+        
+        {/* Search and Category Filter Toolbar */}
         <div className="rounded-[20px] bg-white p-4 shadow-[0_8px_24px_rgba(0,0,0,0.06)] sm:p-5 lg:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            
+            {/* Category Pill Switcher */}
             <div className="flex flex-wrap gap-2.5">
               {productCategories.map((category) => {
                 const active = activeCategory === category;
@@ -125,6 +145,7 @@ export default function ProductsClientPage({ initialCategory }) {
               })}
             </div>
 
+            {/* Global Search Input */}
             <div className="w-full lg:max-w-[340px]">
               <label htmlFor="search-products" className="sr-only">
                 Search products
@@ -141,12 +162,14 @@ export default function ProductsClientPage({ initialCategory }) {
           </div>
         </div>
 
+        {/* Status Messaging */}
         {error ? (
           <p className="mt-8 rounded-[14px] bg-white px-5 py-6 text-center text-[0.95rem] text-[#B42318]">
             {error}
           </p>
         ) : null}
 
+        {/* Loading Skeleton Placeholder */}
         {loading ? (
           <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
@@ -157,6 +180,7 @@ export default function ProductsClientPage({ initialCategory }) {
             ))}
           </div>
         ) : (
+          /* Actual Product Grid */
           <div className="mt-7 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {filteredProducts.map((product) => (
               <ProductCard
@@ -169,6 +193,7 @@ export default function ProductsClientPage({ initialCategory }) {
           </div>
         )}
 
+        {/* Empty State Messaging */}
         {!loading && filteredProducts.length === 0 ? (
           <p className="mt-8 rounded-[14px] bg-white px-5 py-6 text-center text-[0.95rem] text-black/65">
             No products matched your filters.

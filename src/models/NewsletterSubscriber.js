@@ -1,7 +1,13 @@
 import mongoose from "mongoose";
 
+/**
+ * NewsletterSubscriber Schema
+ * Tracks email addresses submitted via the "Join Shopping Community" section.
+ * Includes validation for unique email addresses.
+ */
 const newsletterSubscriberSchema = new mongoose.Schema(
   {
+    // Normalized and validated email address
     email: {
       type: String,
       required: true,
@@ -10,13 +16,15 @@ const newsletterSubscriberSchema = new mongoose.Schema(
       unique: true,
       index: true,
     },
+    // Tracking source for marketing attribution
     source: {
       type: String,
       default: "homepage_newsletter",
     },
   },
   {
-    timestamps: { createdAt: "createdAt", updatedAt: false },
+    // Automatic createdAt and updatedAt fields
+    timestamps: true,
   }
 );
 

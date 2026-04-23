@@ -5,6 +5,7 @@ import PageIntro from "@/components/shared/PageIntro";
 import { apiEndpoints } from "@/lib/api/endpoints";
 import { requestJson } from "@/lib/api/request";
 
+// Initial state for the product creation/edit form
 const emptyForm = {
   title: "",
   category: "women",
@@ -15,6 +16,11 @@ const emptyForm = {
   rating: "4.5",
 };
 
+/**
+ * AdminPage Component
+ * Provides a restricted workspace for managing the storefront catalogue.
+ * Includes features for CRUD operations and triggering product synchronization.
+ */
 export default function AdminPage() {
   const [authUser, setAuthUser] = useState(null);
   const [products, setProducts] = useState([]);
@@ -25,8 +31,10 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
 
+  // Derived total for listing status
   const totalProducts = useMemo(() => products.length, [products]);
 
+  // Load admin session and initial product list on mount
   useEffect(() => {
     let ignore = false;
 
@@ -39,9 +47,9 @@ export default function AdminPage() {
           setAuthUser(user);
         }
 
+        // Only fetch products if the user has the 'admin' role
         if (user?.role === "admin") {
           const productsPayload = await requestJson(apiEndpoints.adminProducts);
-
           if (!ignore) {
             setProducts(productsPayload.data ?? []);
           }
@@ -64,6 +72,9 @@ export default function AdminPage() {
     };
   }, []);
 
+  /**
+   * Handles both creation of new products and updates to existing ones.
+   */
   async function onAddOrUpdateProduct(event) {
     event.preventDefault();
     setSaving(true);
@@ -84,11 +95,11 @@ export default function AdminPage() {
 
       const nextProduct = payload.data;
 
+      // Update local product list without full refresh
       setProducts((prev) => {
         if (editingProductId) {
           return prev.map((product) => (product.id === editingProductId ? nextProduct : product));
         }
-
         return [nextProduct, ...prev];
       });
 
@@ -102,7 +113,12 @@ export default function AdminPage() {
     }
   }
 
+  /**
+   * Removes a product from the database.
+   */
   async function onDeleteProduct(productId) {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+
     try {
       await requestJson(`${apiEndpoints.adminProducts}/${productId}`, {
         method: "DELETE",
@@ -114,6 +130,9 @@ export default function AdminPage() {
     }
   }
 
+  /**
+   * Populates the form with existing product data for editing.
+   */
   function onEditProduct(product) {
     setEditingProductId(product.id);
     setForm({
@@ -125,8 +144,13 @@ export default function AdminPage() {
       imageUrl: product.imageUrl || "",
       rating: String(product.rating || 4.5),
     });
+    // Scroll to form for better UX
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  /**
+   * Triggers the DummyJSON to MongoDB synchronization process.
+   */
   async function onSyncProducts() {
     setSyncing(true);
     setMessage("");
@@ -137,6 +161,7 @@ export default function AdminPage() {
         body: JSON.stringify({ dryRun: false, storeImages: true }),
       });
 
+      // Refresh list to show newly synced items
       const productsPayload = await requestJson(apiEndpoints.adminProducts);
       setProducts(productsPayload.data ?? []);
       setMessage(
@@ -158,11 +183,13 @@ export default function AdminPage() {
       />
 
       <section className="page-container">
+        {/* Loading State */}
         {loading ? (
           <div className="rounded-[20px] bg-white px-6 py-10 text-center shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             Loading admin workspace...
           </div>
-        ) : authUser?.role !== "admin" ? (
+        ) : /* Access Control Check */
+        authUser?.role !== "admin" ? (
           <div className="rounded-[20px] bg-white px-6 py-10 text-center shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
             <h2 className="text-[1.3rem] font-medium text-black">Admin access required</h2>
             <p className="mt-2 text-[0.95rem] text-black/65">
@@ -170,7 +197,10 @@ export default function AdminPage() {
             </p>
           </div>
         ) : (
+          /* Main Admin Workspace Grid */
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr]">
+            
+            {/* Form Column - Product Editor */}
             <div className="rounded-[20px] bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.06)] sm:p-6">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-[1.2rem] font-medium text-black">
@@ -193,6 +223,7 @@ export default function AdminPage() {
                   </label>
                   <input
                     id="title"
+                    required
                     value={form.title}
                     onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
                     className="mt-1.5 w-full rounded-[10px] border border-black/15 px-4 py-2.5 text-[0.9rem] outline-none focus:border-black"
@@ -237,6 +268,7 @@ export default function AdminPage() {
                     id="price"
                     type="number"
                     min="1"
+                    required
                     value={form.price}
                     onChange={(event) => setForm((prev) => ({ ...prev, price: event.target.value }))}
                     className="mt-1.5 w-full rounded-[10px] border border-black/15 px-4 py-2.5 text-[0.9rem] outline-none focus:border-black"
@@ -260,11 +292,8 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="imageUrl"
-                    className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-black/60"
-                  >
-                    Image URL
+                  <label htmlFor="imageUrl" className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-black/60">
+                    Image URL (External or Upload)
                   </label>
                   <input
                     id="imageUrl"
@@ -276,15 +305,13 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label
-                    htmlFor="description"
-                    className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-black/60"
-                  >
+                  <label htmlFor="description" className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-black/60">
                     Description
                   </label>
                   <textarea
                     id="description"
                     rows="4"
+                    required
                     value={form.description}
                     onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
                     className="mt-1.5 w-full rounded-[10px] border border-black/15 px-4 py-2.5 text-[0.9rem] outline-none focus:border-black"
@@ -315,11 +342,15 @@ export default function AdminPage() {
                 </div>
               </form>
 
+              {/* Form Feedback Message */}
               {message ? (
-                <p className="mt-3 rounded-[10px] bg-[#F6F7F8] px-3 py-2 text-[0.8rem] text-black/70">{message}</p>
+                <p className="mt-3 rounded-[10px] bg-[#F6F7F8] px-3 py-2 text-[0.8rem] text-black/70">
+                  {message}
+                </p>
               ) : null}
             </div>
 
+            {/* List Column - Listing Management Table */}
             <div className="rounded-[20px] bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.06)] sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <h2 className="text-[1.2rem] font-medium text-black">Manage Listings</h2>

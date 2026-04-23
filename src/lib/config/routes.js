@@ -1,3 +1,7 @@
+/**
+ * Constant definitions for all application routes.
+ * Centralizes URL management to prevent broken links.
+ */
 export const appRoutes = {
   home: "/",
   products: "/products",

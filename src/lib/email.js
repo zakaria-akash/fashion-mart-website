@@ -2,12 +2,24 @@ import crypto from "node:crypto";
 import nodemailer from "nodemailer";
 import { serverEnv } from "@/lib/env";
 
-const VERIFICATION_TOKEN_TTL_MS = 1000 * 60 * 60 * 24;
+/**
+ * Email Service
+ * Handles transactional email delivery using Nodemailer.
+ * Supports SMTP for production and JSON/logging for development.
+ */
 
+const VERIFICATION_TOKEN_TTL_MS = 1000 * 60 * 60 * 24; // 24 hours
+
+/**
+ * Checks if the required SMTP configuration is present.
+ */
 function hasSmtpConfig() {
   return Boolean(serverEnv.smtpHost && serverEnv.smtpUser && serverEnv.smtpPass);
 }
 
+/**
+ * Creates the Nodemailer transporter based on current environment settings.
+ */
 function createTransport() {
   if (hasSmtpConfig()) {
     return nodemailer.createTransport({
@@ -21,11 +33,15 @@ function createTransport() {
     });
   }
 
+  // Development fallback: logs email content instead of sending
   return nodemailer.createTransport({
     jsonTransport: true,
   });
 }
 
+/**
+ * Generates a secure random verification token and its hash for database storage.
+ */
 export function createVerificationToken() {
   const token = crypto.randomBytes(32).toString("hex");
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
@@ -37,6 +53,9 @@ export function createVerificationToken() {
   };
 }
 
+/**
+ * Constructs the absolute URL for email verification.
+ */
 export function buildVerificationUrl({ email, token, origin }) {
   const baseUrl = origin || serverEnv.appBaseUrl;
   const url = new URL("/verify-email", baseUrl);
@@ -45,10 +64,16 @@ export function buildVerificationUrl({ email, token, origin }) {
   return url.toString();
 }
 
+/**
+ * Hashes a token for lookup/comparison in the database.
+ */
 export function hashVerificationToken(token) {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
 
+/**
+ * Sends a stylized HTML verification email to a new user.
+ */
 export async function sendVerificationEmail({ email, name, verificationUrl }) {
   const transporter = createTransport();
   const from = `${serverEnv.smtpFromName} <${serverEnv.smtpFromEmail}>`;
@@ -92,6 +117,7 @@ export async function sendVerificationEmail({ email, name, verificationUrl }) {
     };
   }
 
+  // Console output for development when SMTP is not configured
   console.log("Fashion Mart verification email preview:", verificationUrl);
 
   return {

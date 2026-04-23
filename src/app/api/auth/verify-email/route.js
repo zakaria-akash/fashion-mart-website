@@ -5,6 +5,10 @@ import { User } from "@/models/User";
 
 export const runtime = "nodejs";
 
+/**
+ * POST /api/auth/verify-email
+ * Validates a verification token and activates the corresponding user account.
+ */
 export async function POST(request) {
   try {
     await connectToDatabase();
@@ -12,6 +16,7 @@ export async function POST(request) {
     const email = typeof json?.email === "string" ? json.email.trim().toLowerCase() : "";
     const token = typeof json?.token === "string" ? json.token.trim() : "";
 
+    // Parameter presence check
     if (!email || !token) {
       return errorResponse("INVALID_VERIFICATION_LINK", "This verification link is invalid.", 400);
     }
@@ -23,12 +28,14 @@ export async function POST(request) {
       return errorResponse("ACCOUNT_NOT_FOUND", "No account was found for this verification link.", 404);
     }
 
+    // Skip if already active
     if (user.emailVerified) {
       return successResponse({
         message: "Your account is already verified. You can log in now.",
       });
     }
 
+    // Hash comparison and expiration check
     const isValidToken =
       user.emailVerificationTokenHash === tokenHash &&
       user.emailVerificationExpiresAt &&
@@ -38,6 +45,7 @@ export async function POST(request) {
       return errorResponse("VERIFICATION_EXPIRED", "This verification link has expired. Please request a new one.", 400);
     }
 
+    // Activate the account
     user.emailVerified = true;
     user.emailVerificationTokenHash = null;
     user.emailVerificationExpiresAt = null;

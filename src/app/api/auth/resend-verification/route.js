@@ -6,6 +6,10 @@ import { User } from "@/models/User";
 
 export const runtime = "nodejs";
 
+/**
+ * POST /api/auth/resend-verification
+ * Generates and sends a new email verification link if the account is not yet verified.
+ */
 export async function POST(request) {
   try {
     await connectToDatabase();
@@ -23,17 +27,20 @@ export async function POST(request) {
       return errorResponse("ACCOUNT_NOT_FOUND", "No account exists for that email address.", 404);
     }
 
+    // Check if account is already active
     if (user.emailVerified) {
       return successResponse({
         message: "This account is already verified. You can log in now.",
       });
     }
 
+    // Generate fresh token and update the user record
     const verification = createVerificationToken();
     user.emailVerificationTokenHash = verification.tokenHash;
     user.emailVerificationExpiresAt = verification.expiresAt;
     await user.save();
 
+    // Trigger email delivery
     const origin = new URL(request.url).origin;
     const verificationUrl = buildVerificationUrl({
       email,

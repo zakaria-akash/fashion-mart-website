@@ -9,16 +9,27 @@ import { requestJson } from "@/lib/api/request";
 import { appRoutes } from "@/lib/config/routes";
 import { useToast } from "@/components/providers/ToastProvider";
 
+/**
+ * VerifyEmailClientPage Component
+ * Automates the email verification process by calling the backend API
+ * as soon as the user lands on the verification URL.
+ */
 export default function VerifyEmailClientPage({ email = "", token = "" }) {
   const router = useRouter();
   const { showToast } = useToast();
+  
+  // Status tracking: verifying, success, or error
   const [status, setStatus] = useState("verifying");
   const [message, setMessage] = useState("Verifying your account...");
 
   useEffect(() => {
     let ignore = false;
 
+    /**
+     * Executes the verification request.
+     */
     async function verify() {
+      // Validate presence of required parameters
       if (!email || !token) {
         setStatus("error");
         setMessage("This verification link is incomplete.");
@@ -37,6 +48,8 @@ export default function VerifyEmailClientPage({ email = "", token = "" }) {
           showToast(response.message || "Email verified successfully.", {
             label: "Verification complete",
           });
+          
+          // Delayed redirection to login after showing success state
           window.setTimeout(() => {
             router.replace(`${appRoutes.login}?verified=1&email=${encodeURIComponent(email)}`);
           }, 1200);
@@ -70,6 +83,8 @@ export default function VerifyEmailClientPage({ email = "", token = "" }) {
 
       <section className="page-container">
         <div className="mx-auto max-w-[560px] rounded-[20px] bg-white p-6 text-center shadow-[0_16px_40px_rgba(0,0,0,0.08)] sm:p-8">
+          
+          {/* Status Indicator Visual */}
           <div
             className={`mx-auto flex h-16 w-16 items-center justify-center rounded-full text-[0.9rem] font-medium uppercase tracking-[0.08em] ${
               status === "error" ? "bg-[#fff4f2] text-[#B42318]" : "bg-[#f5fbf7] text-[#067647]"
@@ -77,8 +92,10 @@ export default function VerifyEmailClientPage({ email = "", token = "" }) {
           >
             {status === "verifying" ? "..." : status === "success" ? "Done" : "Oops"}
           </div>
+          
           <p className="mt-5 text-[1rem] leading-[1.7] text-black/70">{message}</p>
 
+          {/* Fallback navigation for error states */}
           {status === "error" ? (
             <Link
               href={appRoutes.login}

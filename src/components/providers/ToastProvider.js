@@ -4,7 +4,12 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 
 const ToastContext = createContext(null);
 
+/**
+ * ToastItem Sub-component
+ * Individual stylized notification entry with entrance/exit transitions.
+ */
 function ToastItem({ toast, onDismiss }) {
+  // Dynamic styling based on toast tone (success or error)
   const toneClasses =
     toast.tone === "error"
       ? "border-[#f1b5ad] bg-[#fff5f3] text-[#8a271a]"
@@ -32,13 +37,24 @@ function ToastItem({ toast, onDismiss }) {
   );
 }
 
+/**
+ * ToastProvider Component
+ * Manages a stack of ephemeral feedback messages shown at the bottom of the screen.
+ * Ideal for auth feedback, form errors, and successful data operations.
+ */
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
 
+  /**
+   * Removes a specific toast from the current stack.
+   */
   const dismissToast = useCallback((id) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
   }, []);
 
+  /**
+   * Pushes a new toast onto the stack and schedules its automatic dismissal.
+   */
   const showToast = useCallback((message, options = {}) => {
     const id = crypto.randomUUID();
     const nextToast = {
@@ -49,6 +65,8 @@ export function ToastProvider({ children }) {
     };
 
     setToasts((prev) => [...prev, nextToast]);
+    
+    // Auto-dismiss after the configured duration
     window.setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, options.duration ?? 4200);
@@ -65,6 +83,8 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
+      
+      {/* Absolute container for the toast stack, positioned over all content */}
       <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[120] flex flex-col items-center gap-3 px-4 sm:items-end sm:px-6 lg:px-10">
         {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onDismiss={dismissToast} />
@@ -74,6 +94,9 @@ export function ToastProvider({ children }) {
   );
 }
 
+/**
+ * Custom hook to trigger toast notifications.
+ */
 export function useToast() {
   const context = useContext(ToastContext);
 

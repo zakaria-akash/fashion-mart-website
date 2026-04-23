@@ -5,37 +5,47 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ToastProvider } from "@/components/providers/ToastProvider";
 import { Poppins } from "next/font/google";
 
-// Global font configuration used across the full application.
+/**
+ * Global font configuration using Next.js font optimization.
+ * Poppins is used for all branding and body text.
+ */
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "900"],
   display: "swap",
 });
 
-// Base SEO and browser tab metadata.
+/**
+ * SEO and Document Metadata.
+ */
 export const metadata = {
   title: "Fashion Mart",
-  description: "Website clone project",
+  description: "High-fidelity website clone project built with Next.js and MongoDB.",
   icons: {
     icon: "/images/tab-icon.png",
   },
 };
 
+/**
+ * RootLayout Component
+ * Defines the master shell for the entire application.
+ * Includes app-wide providers for authentication and notifications.
+ */
 export default function RootLayout({ children }) {
   return (
-    // Root document shell used by all pages/components.
     <html lang="en" className="h-full antialiased">
-      {/* Global font class is attached to body so all content inherits Poppins. */}
       <body className={`${poppins.className} min-h-full`}>
+        {/* Global Toast notifications layer */}
         <ToastProvider>
+          {/* Global User session management layer */}
           <AuthProvider>
-            {/* App-wide header shared by all pages. */}
+            {/* Global navigation header */}
             <Header />
 
-            {/* Current route content. */}
+            {/* Dynamic page content */}
             {children}
 
-            {/* App-wide footer shared by all pages. */}
+            {/* Global site footer */}
             <AppFooter />
           </AuthProvider>
         </ToastProvider>

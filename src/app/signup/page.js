@@ -8,8 +8,14 @@ import { apiEndpoints } from "@/lib/api/endpoints";
 import { requestJson } from "@/lib/api/request";
 import { useToast } from "@/components/providers/ToastProvider";
 
+/**
+ * SignupPage Component
+ * Provides registration functionality with validation and email verification previews.
+ */
 export default function SignupPage() {
   const { showToast } = useToast();
+  
+  // Local form and UI feedback states
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -17,6 +23,9 @@ export default function SignupPage() {
   const [verificationPreview, setVerificationPreview] = useState("");
   const [deliveryMode, setDeliveryMode] = useState("");
 
+  /**
+   * Validates form inputs before submission.
+   */
   function validate(nextForm) {
     const nextErrors = {};
 
@@ -35,6 +44,9 @@ export default function SignupPage() {
     return nextErrors;
   }
 
+  /**
+   * Handles user registration request.
+   */
   async function onSubmit(event) {
     event.preventDefault();
     const nextErrors = validate(form);
@@ -56,23 +68,20 @@ export default function SignupPage() {
         body: JSON.stringify(form),
       });
 
+      // Reset form and show success feedback
       setForm({ name: "", email: "", password: "" });
       setErrors({});
       setVerificationPreview(payload.data?.delivery?.previewUrl || "");
       setDeliveryMode(payload.data?.delivery?.mode || "");
+      
       showToast(payload.message || "Verification email sent.", {
         label: "Signup successful",
       });
     } catch (requestError) {
       const nextMessage = requestError.message || "Unable to create your account right now.";
-      setErrors({
-        form: nextMessage,
-      });
+      setErrors({ form: nextMessage });
       setDeliveryMode("");
-      showToast(nextMessage, {
-        tone: "error",
-        label: "Signup failed",
-      });
+      showToast(nextMessage, { tone: "error", label: "Signup failed" });
     } finally {
       setSubmitting(false);
     }
@@ -88,6 +97,8 @@ export default function SignupPage() {
 
       <section className="page-container">
         <div className="mx-auto w-full max-w-[560px] rounded-[20px] bg-white p-6 shadow-[0_16px_40px_rgba(0,0,0,0.08)] sm:p-8">
+          
+          {/* Switcher toggle between Login and Signup */}
           <div className="mb-5 grid grid-cols-2 rounded-[12px] bg-[#f5f5f5] p-1">
             <Link
               href={appRoutes.login}
@@ -110,7 +121,7 @@ export default function SignupPage() {
                 type="text"
                 value={form.name}
                 onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-                className="mt-2 w-full rounded-[10px] border border-black/15 px-4 py-3 text-[0.95rem] outline-none transition-colors duration-200 focus:border-black"
+                className="mt-2 w-full rounded-[10px] border border-black/15 px-4 py-3 text-[0.95rem] outline-none focus:border-black"
                 placeholder="Jane Doe"
               />
               {errors.name ? <p className="mt-1 text-[0.78rem] text-[#B42318]">{errors.name}</p> : null}
@@ -125,7 +136,7 @@ export default function SignupPage() {
                 type="email"
                 value={form.email}
                 onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-                className="mt-2 w-full rounded-[10px] border border-black/15 px-4 py-3 text-[0.95rem] outline-none transition-colors duration-200 focus:border-black"
+                className="mt-2 w-full rounded-[10px] border border-black/15 px-4 py-3 text-[0.95rem] outline-none focus:border-black"
                 placeholder="jane@example.com"
               />
               {errors.email ? <p className="mt-1 text-[0.78rem] text-[#B42318]">{errors.email}</p> : null}
@@ -142,7 +153,7 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="text-[0.76rem] font-medium uppercase tracking-[0.08em] text-black/55 transition-opacity duration-200 hover:opacity-70"
+                  className="text-[0.76rem] font-medium uppercase tracking-[0.08em] text-black/55 hover:opacity-70"
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
@@ -152,7 +163,7 @@ export default function SignupPage() {
                 type={showPassword ? "text" : "password"}
                 value={form.password}
                 onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-                className="mt-2 w-full rounded-[10px] border border-black/15 px-4 py-3 text-[0.95rem] outline-none transition-colors duration-200 focus:border-black"
+                className="mt-2 w-full rounded-[10px] border border-black/15 px-4 py-3 text-[0.95rem] outline-none focus:border-black"
                 placeholder="Minimum 8 characters"
               />
               {errors.password ? <p className="mt-1 text-[0.78rem] text-[#B42318]">{errors.password}</p> : null}
@@ -161,20 +172,18 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="mt-2 w-full rounded-[10px] bg-black px-6 py-3 text-[0.95rem] font-medium text-white transition-colors duration-200 hover:bg-[#1d1d1d] disabled:opacity-70"
+              className="mt-2 w-full rounded-[10px] bg-black px-6 py-3 text-[0.95rem] font-medium text-white hover:bg-[#1d1d1d] disabled:opacity-70"
             >
               {submitting ? "Creating..." : "Create Account"}
             </button>
 
             {errors.form ? <p className="text-[0.78rem] text-[#B42318]">{errors.form}</p> : null}
 
+            {/* In-browser preview for development/testing without real SMTP */}
             {verificationPreview ? (
               <div className="rounded-[12px] bg-[#f6f7f8] px-4 py-3 text-[0.84rem] leading-[1.6] text-black/70">
                 Development preview link:
-                <a
-                  href={verificationPreview}
-                  className="ml-2 font-medium text-black underline underline-offset-2"
-                >
+                <a href={verificationPreview} className="ml-2 font-medium text-black underline underline-offset-2">
                   Verify account
                 </a>
               </div>
@@ -182,7 +191,7 @@ export default function SignupPage() {
 
             {deliveryMode === "smtp" ? (
               <div className="rounded-[12px] bg-[#f5fbf7] px-4 py-3 text-[0.84rem] leading-[1.6] text-[#166534]">
-                Verification email was sent through real SMTP delivery. If it is not in your inbox, check Spam or Promotions.
+                Verification email was sent through real SMTP delivery.
               </div>
             ) : null}
           </form>

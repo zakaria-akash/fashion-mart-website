@@ -10,20 +10,30 @@ import { requestJson } from "@/lib/api/request";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
 
+/**
+ * LoginClientPage Component
+ * Handles the user login flow, including validation, session refresh, 
+ * and redirection based on user role.
+ */
 export default function LoginClientPage({ initialEmail = "", verified = false }) {
   const router = useRouter();
   const { refreshSession } = useAuth();
   const { showToast } = useToast();
+  
+  // Local form state
   const [form, setForm] = useState({
     email: initialEmail,
     password: "",
   });
+  
+  // Status and feedback states
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showResendVerification, setShowResendVerification] = useState(false);
   const [resendingVerification, setResendingVerification] = useState(false);
 
+  // Show success toast if redirected from a successful email verification
   useEffect(() => {
     if (verified) {
       showToast("Your account is verified. Please log in to continue.", {
@@ -32,25 +42,23 @@ export default function LoginClientPage({ initialEmail = "", verified = false })
     }
   }, [showToast, verified]);
 
+  /**
+   * Handles form submission and performs authentication.
+   */
   async function onSubmit(event) {
     event.preventDefault();
     setShowResendVerification(false);
 
+    // Basic client-side validation
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       setError("Please enter a valid email address.");
-      showToast("Please enter a valid email address.", {
-        tone: "error",
-        label: "Login failed",
-      });
+      showToast("Please enter a valid email address.", { tone: "error", label: "Login failed" });
       return;
     }
 
     if (form.password.length < 8) {
       setError("Password must be at least 8 characters.");
-      showToast("Password must be at least 8 characters.", {
-        tone: "error",
-        label: "Login failed",
-      });
+      showToast("Password must be at least 8 characters.", { tone: "error", label: "Login failed" });
       return;
     }
 
@@ -58,31 +66,38 @@ export default function LoginClientPage({ initialEmail = "", verified = false })
       setSubmitting(true);
       setError("");
 
+      // Trigger login API call
       const payload = await requestJson(apiEndpoints.authLogin, {
         method: "POST",
         body: JSON.stringify(form),
       });
 
       const user = payload.data?.user;
+      
+      // Sync global auth state
       await refreshSession();
-      showToast(`Welcome back, ${user?.name || "there"}.`, {
-        label: "Login successful",
-      });
+      
+      showToast(`Welcome back, ${user?.name || "there"}.`, { label: "Login successful" });
+      
+      // Role-based redirection
       router.push(user?.role === "admin" ? appRoutes.admin : appRoutes.products);
       router.refresh();
     } catch (requestError) {
       const nextError = requestError.message || "Unable to login right now.";
       setError(nextError);
+      
+      // Offer resend option if account is unverified
       setShowResendVerification(requestError.payload?.code === "EMAIL_NOT_VERIFIED");
-      showToast(nextError, {
-        tone: "error",
-        label: "Login failed",
-      });
+      
+      showToast(nextError, { tone: "error", label: "Login failed" });
     } finally {
       setSubmitting(false);
     }
   }
 
+  /**
+   * Requests a new verification email for the current email address.
+   */
   async function handleResendVerification() {
     try {
       setResendingVerification(true);
@@ -90,9 +105,7 @@ export default function LoginClientPage({ initialEmail = "", verified = false })
         method: "POST",
         body: JSON.stringify({ email: form.email }),
       });
-      showToast(payload.message || "Verification email sent again.", {
-        label: "Verification sent",
-      });
+      showToast(payload.message || "Verification email sent again.", { label: "Verification sent" });
     } catch (requestError) {
       showToast(requestError.message || "Unable to resend verification email.", {
         tone: "error",
@@ -113,6 +126,8 @@ export default function LoginClientPage({ initialEmail = "", verified = false })
 
       <section className="page-container">
         <div className="mx-auto w-full max-w-[560px] rounded-[20px] bg-white p-6 shadow-[0_16px_40px_rgba(0,0,0,0.08)] sm:p-8">
+          
+          {/* Switcher between Login and Signup */}
           <div className="mb-5 grid grid-cols-2 rounded-[12px] bg-[#f5f5f5] p-1">
             <span className="rounded-[10px] bg-black px-3 py-2 text-center text-[0.86rem] font-medium uppercase tracking-[0.08em] !text-white">
               Login
@@ -168,6 +183,7 @@ export default function LoginClientPage({ initialEmail = "", verified = false })
 
             {error ? <p className="text-[0.82rem] text-[#B42318]">{error}</p> : null}
 
+            {/* Unverified account resend trigger */}
             {showResendVerification ? (
               <div className="rounded-[12px] bg-[#fff8e8] px-4 py-3 text-[0.84rem] text-[#6c5410]">
                 Your account is waiting for email verification.
