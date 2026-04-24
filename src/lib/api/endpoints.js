@@ -5,6 +5,7 @@
 export const apiEndpoints = {
   authSignup: "/api/auth/signup",
   authLogin: "/api/auth/login",
+  authAdminLogin: "/api/auth/admin-login",
   authMe: "/api/auth/me",
   authLogout: "/api/auth/logout",
   authVerifyEmail: "/api/auth/verify-email",

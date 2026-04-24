@@ -45,6 +45,7 @@ export const serverEnv = {
     .split(",")
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean),
+  adminPassword: getEnv("ADMIN_PASSWORD", "admin12345"),
     
   // SMTP configuration for email delivery
   smtpHost: getEnv("SMTP_HOST"),

@@ -23,8 +23,25 @@ export async function GET() {
       });
     }
 
-    // Refresh user data from database to ensure up-to-date roles/status
-    const user = await User.findById(session.sub).lean();
+    // SPECIAL CASE: Handle the hardcoded master admin session
+    if (session.sub === "master-admin") {
+      return successResponse({
+        data: {
+          user: {
+            id: "master-admin",
+            name: session.name || "System Admin",
+            email: session.email,
+            role: "admin",
+            emailVerified: true,
+          },
+        },
+      });
+    }
+
+    // STANDARD CASE: Refresh user data from database for standard users/admins
+    // Check if sub is a valid ObjectId before querying to prevent Mongoose errors
+    const isValidId = /^[0-9a-fA-F]{24}$/.test(session.sub);
+    const user = isValidId ? await User.findById(session.sub).lean() : null;
 
     if (!user) {
       return successResponse({

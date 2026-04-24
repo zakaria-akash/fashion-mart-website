@@ -11,4 +11,5 @@ export const appRoutes = {
   login: "/login",
   signup: "/signup",
   admin: "/admin",
+  adminLogin: "/admin-login",
 };

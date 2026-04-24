@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import PageIntro from "@/components/shared/PageIntro";
 import { apiEndpoints } from "@/lib/api/endpoints";
 import { requestJson } from "@/lib/api/request";
+import { useAuth } from "@/components/providers/AuthProvider";
+import { useToast } from "@/components/providers/ToastProvider";
 
-// Initial state for the product creation/edit form
+// Safe initial state for the product form
 const emptyForm = {
   title: "",
   category: "women",
@@ -17,392 +20,323 @@ const emptyForm = {
 };
 
 /**
- * AdminPage Component
- * Provides a restricted workspace for managing the storefront catalogue.
- * Includes features for CRUD operations and triggering product synchronization.
+ * AdminDashboard Component
+ * A premium, interactive staff portal for product management.
  */
-export default function AdminPage() {
-  const [authUser, setAuthUser] = useState(null);
+export default function AdminDashboard() {
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  const { showToast } = useToast();
+
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState(emptyForm);
-  const [editingProductId, setEditingProductId] = useState(null);
-  const [message, setMessage] = useState("");
+  const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const [searchTerm, setSearchParams] = useState("");
 
-  // Derived total for listing status
-  const totalProducts = useMemo(() => products.length, [products]);
-
-  // Load admin session and initial product list on mount
+  // Role-based Access Guard
   useEffect(() => {
-    let ignore = false;
-
-    async function loadAdminData() {
-      try {
-        const authPayload = await requestJson(apiEndpoints.authMe);
-        const user = authPayload.data?.user ?? null;
-
-        if (!ignore) {
-          setAuthUser(user);
-        }
-
-        // Only fetch products if the user has the 'admin' role
-        if (user?.role === "admin") {
-          const productsPayload = await requestJson(apiEndpoints.adminProducts);
-          if (!ignore) {
-            setProducts(productsPayload.data ?? []);
-          }
-        }
-      } catch (requestError) {
-        if (!ignore) {
-          setMessage(requestError.message || "Unable to load admin data.");
-        }
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
+    if (!authLoading && (!user || user.role !== "admin")) {
+      showToast("Unauthorized access. Admin privileges required.", { tone: "error" });
+      router.replace("/");
     }
+  }, [user, authLoading, router, showToast]);
 
-    loadAdminData();
+  // Load initial dataset
+  useEffect(() => {
+    if (user?.role === "admin") {
+      loadProducts();
+    }
+  }, [user]);
 
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  /**
-   * Handles both creation of new products and updates to existing ones.
-   */
-  async function onAddOrUpdateProduct(event) {
-    event.preventDefault();
-    setSaving(true);
-    setMessage("");
-
+  async function loadProducts() {
+    setLoading(true);
     try {
-      const payload = await requestJson(
-        editingProductId ? `${apiEndpoints.adminProducts}/${editingProductId}` : apiEndpoints.adminProducts,
-        {
-          method: editingProductId ? "PUT" : "POST",
-          body: JSON.stringify({
-            ...form,
-            price: Number(form.price),
-            rating: Number(form.rating),
-          }),
-        }
-      );
+      const payload = await requestJson(apiEndpoints.adminProducts);
+      setProducts(payload.data ?? []);
+    } catch (err) {
+      showToast("Failed to load inventory.", { tone: "error" });
+    } finally {
+      setLoading(false);
+    }
+  }
 
-      const nextProduct = payload.data;
+  // Filter products locally for a smooth UI experience
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm) return products;
+    return products.filter((p) => 
+      p.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      p.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [products, searchTerm]);
 
-      // Update local product list without full refresh
-      setProducts((prev) => {
-        if (editingProductId) {
-          return prev.map((product) => (product.id === editingProductId ? nextProduct : product));
-        }
-        return [nextProduct, ...prev];
+  async function onSaveProduct(e) {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const endpoint = editingId ? `${apiEndpoints.adminProducts}/${editingId}` : apiEndpoints.adminProducts;
+      const method = editingId ? "PUT" : "POST";
+      
+      const payload = await requestJson(endpoint, {
+        method,
+        body: JSON.stringify({
+          ...form,
+          price: Number(form.price),
+          rating: Number(form.rating),
+        }),
       });
 
+      if (editingId) {
+        setProducts(products.map(p => p.id === editingId ? payload.data : p));
+        showToast("Product updated successfully.");
+      } else {
+        setProducts([payload.data, ...products]);
+        showToast("New product listed.");
+      }
+
       setForm(emptyForm);
-      setEditingProductId(null);
-      setMessage(editingProductId ? "Product updated successfully." : "Product added successfully.");
-    } catch (requestError) {
-      setMessage(requestError.message || "Unable to save the product.");
+      setEditingId(null);
+    } catch (err) {
+      showToast(err.message || "Action failed.", { tone: "error" });
     } finally {
       setSaving(false);
     }
   }
 
-  /**
-   * Removes a product from the database.
-   */
-  async function onDeleteProduct(productId) {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
-
+  async function onDeleteProduct(id) {
+    if (!confirm("Are you sure? This action is permanent.")) return;
     try {
-      await requestJson(`${apiEndpoints.adminProducts}/${productId}`, {
-        method: "DELETE",
-      });
-      setProducts((prev) => prev.filter((product) => product.id !== productId));
-      setMessage("Product removed from listing.");
-    } catch (requestError) {
-      setMessage(requestError.message || "Unable to delete the product.");
+      await requestJson(`${apiEndpoints.adminProducts}/${id}`, { method: "DELETE" });
+      setProducts(products.filter(p => p.id !== id));
+      showToast("Product removed.", { tone: "success" });
+    } catch (err) {
+      showToast("Delete failed.", { tone: "error" });
     }
   }
 
-  /**
-   * Populates the form with existing product data for editing.
-   */
-  function onEditProduct(product) {
-    setEditingProductId(product.id);
+  function startEdit(p) {
+    setEditingId(p.id);
     setForm({
-      title: product.title,
-      category: product.category,
-      price: String(product.price),
-      description: product.description,
-      brand: product.brand || "Fashion Mart",
-      imageUrl: product.imageUrl || "",
-      rating: String(product.rating || 4.5),
+      title: p.title,
+      category: p.category,
+      price: String(p.price),
+      description: p.description,
+      brand: p.brand || "Fashion Mart",
+      imageUrl: p.imageUrl || "",
+      rating: String(p.rating || 4.5),
     });
-    // Scroll to form for better UX
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  /**
-   * Triggers the DummyJSON to MongoDB synchronization process.
-   */
-  async function onSyncProducts() {
+  async function triggerSync() {
     setSyncing(true);
-    setMessage("");
-
     try {
-      const payload = await requestJson(apiEndpoints.adminSyncProducts, {
-        method: "POST",
-        body: JSON.stringify({ dryRun: false, storeImages: true }),
-      });
-
-      // Refresh list to show newly synced items
-      const productsPayload = await requestJson(apiEndpoints.adminProducts);
-      setProducts(productsPayload.data ?? []);
-      setMessage(
-        `Sync complete: ${payload.inserted} inserted, ${payload.updated} updated, ${payload.imagesStored} images stored.`
-      );
-    } catch (requestError) {
-      setMessage(requestError.message || "Unable to sync products right now.");
+      const res = await requestJson(apiEndpoints.adminSyncProducts, { method: "POST" });
+      await loadProducts();
+      showToast(`Sync successful: ${res.inserted} new, ${res.updated} updated.`);
+    } catch (err) {
+      showToast("Inventory sync failed.", { tone: "error" });
     } finally {
       setSyncing(false);
     }
   }
 
+  if (authLoading || !user || user.role !== "admin") {
+    return <div className="page-shell flex items-center justify-center">Verifying credentials...</div>;
+  }
+
   return (
-    <main className="page-shell pb-16">
+    <main className="page-shell pb-24">
       <PageIntro
-        eyebrow="Admin"
-        title="Product Management"
-        description="Manage live catalogue items, sync external seed data, and keep the storefront aligned with your admin session."
+        eyebrow="Staff Portal"
+        title="Inventory Manager"
+        description="Unified interface for listing new arrivals, managing categories, and synchronizing global catalogues."
       />
 
-      <section className="page-container">
-        {/* Loading State */}
-        {loading ? (
-          <div className="rounded-[20px] bg-white px-6 py-10 text-center shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-            Loading admin workspace...
-          </div>
-        ) : /* Access Control Check */
-        authUser?.role !== "admin" ? (
-          <div className="rounded-[20px] bg-white px-6 py-10 text-center shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-            <h2 className="text-[1.3rem] font-medium text-black">Admin access required</h2>
-            <p className="mt-2 text-[0.95rem] text-black/65">
-              Sign up with the first account or an email listed in `ADMIN_EMAILS`, then log in to manage products.
-            </p>
-          </div>
-        ) : (
-          /* Main Admin Workspace Grid */
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-[420px_1fr]">
-            
-            {/* Form Column - Product Editor */}
-            <div className="rounded-[20px] bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.06)] sm:p-6">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-[1.2rem] font-medium text-black">
-                  {editingProductId ? "Edit Product" : "Add Product"}
-                </h2>
-                <button
-                  type="button"
-                  onClick={onSyncProducts}
-                  disabled={syncing}
-                  className="rounded-[10px] border border-black/15 px-3 py-2 text-[0.78rem] font-medium uppercase tracking-[0.08em] text-black transition-colors duration-200 hover:bg-black hover:text-white disabled:opacity-60"
+      <section className="page-container mt-6">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[400px_1fr]">
+          
+          {/* Side Panel: Product Editor */}
+          <div className="motion-fade-up sticky top-28 self-start rounded-[24px] bg-white p-6 shadow-[0_20px_50px_rgba(0,0,0,0.05)] sm:p-8">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[1.2rem] font-bold uppercase tracking-tight text-black">
+                {editingId ? "Modify Listing" : "Quick List"}
+              </h2>
+              {editingId && (
+                <button 
+                  onClick={() => { setEditingId(null); setForm(emptyForm); }}
+                  className="text-[0.75rem] font-medium uppercase tracking-widest text-[#B42318]"
                 >
-                  {syncing ? "Syncing..." : "Sync Seed"}
+                  Cancel
                 </button>
+              )}
+            </div>
+
+            <form onSubmit={onSaveProduct} className="mt-6 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-[0.7rem] font-bold uppercase tracking-widest text-black/40">Product Title</label>
+                <input
+                  required
+                  value={form.title}
+                  onChange={e => setForm({...form, title: e.target.value})}
+                  className="w-full rounded-[12px] border border-black/5 bg-[#f4f6f5] px-4 py-3 text-[0.9rem] outline-none transition-all focus:border-black focus:bg-white"
+                  placeholder="e.g. Vintage Oversized Blazer"
+                />
               </div>
 
-              <form onSubmit={onAddOrUpdateProduct} className="mt-4 space-y-3">
-                <div>
-                  <label htmlFor="title" className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-black/60">
-                    Product Title
-                  </label>
-                  <input
-                    id="title"
-                    required
-                    value={form.title}
-                    onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-                    className="mt-1.5 w-full rounded-[10px] border border-black/15 px-4 py-2.5 text-[0.9rem] outline-none focus:border-black"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="category" className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-black/60">
-                    Category
-                  </label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[0.7rem] font-bold uppercase tracking-widest text-black/40">Category</label>
                   <select
-                    id="category"
                     value={form.category}
-                    onChange={(event) => setForm((prev) => ({ ...prev, category: event.target.value }))}
-                    className="mt-1.5 w-full rounded-[10px] border border-black/15 px-4 py-2.5 text-[0.9rem] outline-none focus:border-black"
+                    onChange={e => setForm({...form, category: e.target.value})}
+                    className="w-full rounded-[12px] border border-black/5 bg-[#f4f6f5] px-4 py-3 text-[0.9rem] outline-none"
                   >
-                    <option value="women">Women</option>
-                    <option value="men">Men</option>
-                    <option value="casual">Casual</option>
-                    <option value="winter">Winter</option>
-                    <option value="streetwear">Streetwear</option>
+                    {["women", "men", "casual", "winter", "streetwear"].map(c => (
+                      <option key={c} value={c}>{c.toUpperCase()}</option>
+                    ))}
                   </select>
                 </div>
-
-                <div>
-                  <label htmlFor="brand" className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-black/60">
-                    Brand
-                  </label>
+                <div className="space-y-1.5">
+                  <label className="text-[0.7rem] font-bold uppercase tracking-widest text-black/40">Price ($)</label>
                   <input
-                    id="brand"
-                    value={form.brand}
-                    onChange={(event) => setForm((prev) => ({ ...prev, brand: event.target.value }))}
-                    className="mt-1.5 w-full rounded-[10px] border border-black/15 px-4 py-2.5 text-[0.9rem] outline-none focus:border-black"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="price" className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-black/60">
-                    Price
-                  </label>
-                  <input
-                    id="price"
                     type="number"
-                    min="1"
                     required
                     value={form.price}
-                    onChange={(event) => setForm((prev) => ({ ...prev, price: event.target.value }))}
-                    className="mt-1.5 w-full rounded-[10px] border border-black/15 px-4 py-2.5 text-[0.9rem] outline-none focus:border-black"
+                    onChange={e => setForm({...form, price: e.target.value})}
+                    className="w-full rounded-[12px] border border-black/5 bg-[#f4f6f5] px-4 py-3 text-[0.9rem] outline-none"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label htmlFor="rating" className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-black/60">
-                    Rating
-                  </label>
-                  <input
-                    id="rating"
-                    type="number"
-                    min="0"
-                    max="5"
-                    step="0.1"
-                    value={form.rating}
-                    onChange={(event) => setForm((prev) => ({ ...prev, rating: event.target.value }))}
-                    className="mt-1.5 w-full rounded-[10px] border border-black/15 px-4 py-2.5 text-[0.9rem] outline-none focus:border-black"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-[0.7rem] font-bold uppercase tracking-widest text-black/40">Image URL</label>
+                <input
+                  value={form.imageUrl}
+                  onChange={e => setForm({...form, imageUrl: e.target.value})}
+                  className="w-full rounded-[12px] border border-black/5 bg-[#f4f6f5] px-4 py-3 text-[0.9rem] outline-none"
+                  placeholder="https://..."
+                />
+              </div>
 
-                <div>
-                  <label htmlFor="imageUrl" className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-black/60">
-                    Image URL (External or Upload)
-                  </label>
-                  <input
-                    id="imageUrl"
-                    value={form.imageUrl}
-                    onChange={(event) => setForm((prev) => ({ ...prev, imageUrl: event.target.value }))}
-                    className="mt-1.5 w-full rounded-[10px] border border-black/15 px-4 py-2.5 text-[0.9rem] outline-none focus:border-black"
-                    placeholder="https://..."
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-[0.7rem] font-bold uppercase tracking-widest text-black/40">Description</label>
+                <textarea
+                  required
+                  rows="3"
+                  value={form.description}
+                  onChange={e => setForm({...form, description: e.target.value})}
+                  className="w-full rounded-[12px] border border-black/5 bg-[#f4f6f5] px-4 py-3 text-[0.9rem] outline-none"
+                />
+              </div>
 
-                <div>
-                  <label htmlFor="description" className="text-[0.8rem] font-medium uppercase tracking-[0.08em] text-black/60">
-                    Description
-                  </label>
-                  <textarea
-                    id="description"
-                    rows="4"
-                    required
-                    value={form.description}
-                    onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
-                    className="mt-1.5 w-full rounded-[10px] border border-black/15 px-4 py-2.5 text-[0.9rem] outline-none focus:border-black"
-                  />
-                </div>
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-full rounded-[12px] bg-black py-4 text-[0.85rem] font-black uppercase tracking-widest text-white transition-all hover:bg-[#1d1d1d] active:scale-95 disabled:opacity-50"
+              >
+                {saving ? "Processing..." : editingId ? "Update Listing" : "Create Listing"}
+              </button>
+            </form>
+          </div>
 
-                <div className="flex gap-3">
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="mt-1 flex-1 rounded-[10px] bg-black px-4 py-2.5 text-[0.9rem] font-medium text-white transition-colors duration-200 hover:bg-[#1d1d1d] disabled:opacity-60"
-                  >
-                    {saving ? "Saving..." : editingProductId ? "Update Product" : "Add Product"}
-                  </button>
+          {/* Main Panel: Inventory Table */}
+          <div className="motion-fade-up motion-delay-1 space-y-6">
+            
+            {/* Toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-[20px] bg-white p-4 shadow-[0_8px_30px_rgba(0,0,0,0.03)] sm:px-6">
+              <div className="relative flex-1 min-w-[240px]">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-black/30">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </span>
+                <input 
+                  type="text"
+                  placeholder="Search listings by title or category..."
+                  value={searchTerm}
+                  onChange={e => setSearchParams(e.target.value)}
+                  className="w-full rounded-full border border-black/5 bg-[#f4f6f5] py-3 pl-11 pr-4 text-[0.9rem] outline-none transition-all focus:bg-white focus:ring-4 focus:ring-black/5"
+                />
+              </div>
 
-                  {editingProductId ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingProductId(null);
-                        setForm(emptyForm);
-                      }}
-                      className="mt-1 rounded-[10px] border border-black/15 px-4 py-2.5 text-[0.9rem] font-medium text-black"
-                    >
-                      Cancel
-                    </button>
-                  ) : null}
-                </div>
-              </form>
-
-              {/* Form Feedback Message */}
-              {message ? (
-                <p className="mt-3 rounded-[10px] bg-[#F6F7F8] px-3 py-2 text-[0.8rem] text-black/70">
-                  {message}
-                </p>
-              ) : null}
+              <button
+                onClick={triggerSync}
+                disabled={syncing}
+                className="flex items-center gap-2 rounded-full border border-black/10 bg-white px-6 py-3 text-[0.8rem] font-bold uppercase tracking-widest text-black transition-all hover:bg-black hover:text-white disabled:opacity-50"
+              >
+                <svg className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                {syncing ? "Syncing..." : "Sync Catalogue"}
+              </button>
             </div>
 
-            {/* List Column - Listing Management Table */}
-            <div className="rounded-[20px] bg-white p-5 shadow-[0_8px_24px_rgba(0,0,0,0.06)] sm:p-6">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <h2 className="text-[1.2rem] font-medium text-black">Manage Listings</h2>
-                <span className="rounded-full bg-black/5 px-3 py-1 text-[0.78rem] font-medium uppercase tracking-[0.08em] text-black/70">
-                  {totalProducts} products
-                </span>
-              </div>
-
-              <div className="mt-4 overflow-hidden rounded-[12px] border border-black/10">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-black/5 text-left">
-                      <th className="px-3 py-2 text-[0.76rem] font-medium uppercase tracking-[0.08em] text-black/65">Title</th>
-                      <th className="px-3 py-2 text-[0.76rem] font-medium uppercase tracking-[0.08em] text-black/65">Category</th>
-                      <th className="px-3 py-2 text-[0.76rem] font-medium uppercase tracking-[0.08em] text-black/65">Price</th>
-                      <th className="px-3 py-2 text-[0.76rem] font-medium uppercase tracking-[0.08em] text-black/65">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map((product) => (
-                      <tr key={product.id} className="border-t border-black/10">
-                        <td className="px-3 py-2.5 text-[0.86rem] text-black">{product.title}</td>
-                        <td className="px-3 py-2.5 text-[0.82rem] uppercase tracking-[0.05em] text-black/65">
-                          {product.category}
-                        </td>
-                        <td className="px-3 py-2.5 text-[0.86rem] text-black">${product.price}</td>
-                        <td className="px-3 py-2.5">
-                          <div className="flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              onClick={() => onEditProduct(product)}
-                              className="rounded-[8px] border border-black/20 px-3 py-1.5 text-[0.76rem] font-medium uppercase tracking-[0.06em] text-black transition-colors duration-200 hover:bg-black hover:text-white"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => onDeleteProduct(product.id)}
-                              className="rounded-[8px] border border-[#B42318]/30 px-3 py-1.5 text-[0.76rem] font-medium uppercase tracking-[0.06em] text-[#B42318] transition-colors duration-200 hover:bg-[#B42318] hover:text-white"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
+            {/* Table Area */}
+            <div className="overflow-hidden rounded-[24px] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
+              {loading ? (
+                <div className="py-20 text-center text-black/40">Fetching records...</div>
+              ) : filteredProducts.length === 0 ? (
+                <div className="py-20 text-center text-black/40">No matching products found.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-black/5 bg-[#fbfbfb]">
+                        <th className="px-6 py-5 text-[0.75rem] font-bold uppercase tracking-widest text-black/40">Product</th>
+                        <th className="px-6 py-5 text-[0.75rem] font-bold uppercase tracking-widest text-black/40">Category</th>
+                        <th className="px-6 py-5 text-[0.75rem] font-bold uppercase tracking-widest text-black/40">Price</th>
+                        <th className="px-6 py-5 text-[0.75rem] font-bold uppercase tracking-widest text-black/40 text-right">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-black/5">
+                      {filteredProducts.map((p) => (
+                        <tr key={p.id} className="group transition-colors hover:bg-[#fbfbfb]">
+                          <td className="px-6 py-5">
+                            <div className="flex items-center gap-4">
+                              <div className="relative h-12 w-10 flex-shrink-0 overflow-hidden rounded-[8px] bg-[#f4f6f5]">
+                                <img src={p.image} className="h-full w-full object-cover" alt="" />
+                              </div>
+                              <span className="text-[0.95rem] font-medium text-black">{p.title}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-5">
+                            <span className="inline-flex rounded-full bg-[#f4f6f5] px-3 py-1 text-[0.7rem] font-bold uppercase tracking-widest text-black/60">
+                              {p.category}
+                            </span>
+                          </td>
+                          <td className="px-6 py-5 text-[0.95rem] font-medium text-black">${p.price}</td>
+                          <td className="px-6 py-5 text-right">
+                            <div className="flex justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                              <button
+                                onClick={() => startEdit(p)}
+                                className="rounded-full border border-black/10 bg-white p-2.5 text-black hover:bg-black hover:text-white"
+                              >
+                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                              </button>
+                              <button
+                                onClick={() => onDeleteProduct(p.id)}
+                                className="rounded-full border border-[#B42318]/20 bg-white p-2.5 text-[#B42318] hover:bg-[#B42318] hover:text-white"
+                              >
+                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
       </section>
     </main>
   );
