@@ -1,6 +1,6 @@
-# 👗 Fashion Mart — High-Fidelity E-Commerce Clone
+# 👗 Fashion Mart — High-Fidelity Digital Apparel Marketplace
 
-🔗 **Live Demo:** [https://fashion-mart-website.vercel.app](https://fashion-mart-website.vercel.app)
+## 🔗 **Live Demo:** [https://fashion-mart-website.vercel.app](https://fashion-mart-website.vercel.app)
 
 ![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css)
