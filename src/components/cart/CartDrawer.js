@@ -35,9 +35,8 @@ export default function CartDrawer() {
     }
     
     // Placeholder for future checkout integration (Stripe, etc.)
-    showToast("Checkout functionality coming soon!", {
-      label: "Feature pending",
-    });
+    setIsDrawerOpen(false);
+    router.push(appRoutes.checkout);
   };
 
   if (!isDrawerOpen) return null;

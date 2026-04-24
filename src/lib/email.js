@@ -126,3 +126,32 @@ export async function sendVerificationEmail({ email, name, verificationUrl }) {
     messageId: info.messageId,
   };
 }
+
+/**
+ * Sends a stylized HTML order confirmation email to the user.
+ */
+export async function sendOrderConfirmationEmail({ email, name, order }) {
+  const transporter = createTransport();
+  const from = `${serverEnv.smtpFromName} <${serverEnv.smtpFromEmail}>`;
+
+  const info = await transporter.sendMail({
+    from,
+    to: email,
+    subject: `Fashion Mart: Order Confirmation #${order.transactionId}`,
+    html: `
+      <div style="font-family:Poppins,Arial,sans-serif;padding:32px;color:#111;">
+        <h1 style="text-transform:uppercase;">Order Confirmed!</h1>
+        <p>Hi ${name}, thanks for your order.</p>
+        <p>Transaction ID: ${order.transactionId}</p>
+        <p>Total: $${order.total.toFixed(2)}</p>
+      </div>
+    `,
+  });
+
+  if (hasSmtpConfig()) {
+    return { mode: "smtp", messageId: info.messageId };
+  }
+
+  console.log("Fashion Mart order confirmation preview:", order.transactionId);
+  return { mode: "dev-preview", messageId: info.messageId };
+}

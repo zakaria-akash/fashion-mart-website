@@ -12,4 +12,5 @@ export const appRoutes = {
   signup: "/signup",
   admin: "/admin",
   adminLogin: "/admin-login",
+  checkout: "/checkout",
 };
