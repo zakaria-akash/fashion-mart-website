@@ -16,6 +16,14 @@ export async function GET() {
         transactionId: o.transactionId,
         total: o.total,
         createdAt: o.createdAt,
+        items: (o.items || []).map(i => ({
+          productId: String(i.productId),
+          title: i.title,
+          price: i.price,
+          quantity: i.quantity,
+          size: i.size || null,
+          color: i.color || null,
+        })),
       }))
     });
   } catch (error) {

@@ -15,4 +15,5 @@ export const apiEndpoints = {
   adminProducts: "/api/admin/products",
   adminSyncProducts: "/api/admin/sync-products",
   newsletter: "/api/newsletter",
+  orders: "/api/orders",
 };

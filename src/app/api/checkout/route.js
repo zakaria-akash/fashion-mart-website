@@ -37,9 +37,15 @@ export async function POST(request) {
       transactionId,
     });
 
-    // Send confirmation email
-    const user = await User.findById(session.sub);
-    await sendOrderConfirmationEmail({ email: user.email, name: user.name, order });
+    // Send confirmation email — non-blocking: failure must not cancel the order
+    try {
+      const user = await User.findById(session.sub);
+      if (user) {
+        await sendOrderConfirmationEmail({ email: user.email, name: user.name, order });
+      }
+    } catch (emailError) {
+      console.error("Order confirmation email failed:", emailError.message);
+    }
 
     return successResponse({
       message: "Order placed successfully.",

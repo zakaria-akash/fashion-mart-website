@@ -20,6 +20,7 @@
 - **🛡️ Secure Auth**: Dual-layered identity system: standard database users for clients and environment-locked master credentials for staff.
 - **🛠️ Specialized Portals**: Fully isolated Client Storefront and Admin Inventory Manager with distinct navigation and layouts.
 - **📦 Smart Persistence**: Unified wishlist and shopping cart logic that merges guest sessions into user accounts.
+- **🛒 Checkout & Orders**: Authenticated users can complete simulated purchases, receive branded HTML confirmation emails, and review their full order history on the My Orders page.
 - **🖼️ GridFS Integration**: Internal high-performance image streaming with aggressive caching.
 
 ---
@@ -84,12 +85,19 @@ When an admin triggers a sync, the system:
 3. Downloads remote images and uploads them to **GridFS**.
 4. Performs an **Upsert** in MongoDB to ensure data freshness without duplicates.
 
-### 2. Authentication Lifecycle
+### 2. Checkout & Order Flow
+When an authenticated user checks out:
+1. Cart items and total are `POST`ed to `/api/checkout`.
+2. A unique `transactionId` is generated and the order is persisted to MongoDB.
+3. A branded HTML confirmation email is dispatched via Nodemailer (non-blocking).
+4. The client is redirected to `/orders` where the new order appears at the top.
+
+### 3. Authentication Lifecycle
 - **Clients**: Standard signup/login flow using database-backed users and email verification.
 - **Staff**: Specialized login portal (`/admin-login`) verifying against `ADMIN_EMAILS` and `ADMIN_PASSWORD` env variables.
 - **Authorization**: Role-based guards prevent client users from accessing the `/admin` workspace.
 
-### 3. Unified Wishlist
+### 4. Unified Wishlist
 - **Guests**: Items are stored against a `sessionId` (UUID) stored in a long-lived cookie.
 - **Users**: Upon login, the system automatically migrates all `sessionId` entries to the user's `userId` and deletes the guest reference.
 
@@ -126,7 +134,7 @@ When an admin triggers a sync, the system:
 
 ## 🔮 Future Upgrades
 
-- [ ] **Stripe Integration**: Move from wishlist to a full checkout and payment flow.
+- [ ] **Stripe Integration**: Replace the current simulated checkout with real payment processing via Stripe or PayPal.
 - [ ] **Advanced Filtering**: Add price-range sliders and color-swatch filtering.
 - [ ] **Product Reviews**: Interactive user feedback system with verified purchase badges.
 - [ ] **PWA Support**: Offline browsing and native-like installation for mobile users.

@@ -23,8 +23,8 @@ export default function CheckoutClientPage() {
         body: JSON.stringify({ items, total: cartTotal }),
       });
       clearCart();
-      showToast("Order placed successfully!");
-      router.push(appRoutes.home);
+      showToast("Order placed! Check your email for confirmation.");
+      router.push(appRoutes.orders);
     } catch (err) {
       showToast(err.message || "Payment failed", { tone: "error" });
     } finally {

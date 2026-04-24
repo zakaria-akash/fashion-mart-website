@@ -10,6 +10,7 @@
 - `APP_BASE_URL` matches the deployed host
 - First admin email is included in `ADMIN_EMAILS` or created intentionally as the first account
 - DummyJSON sync token is stored securely if used outside admin UI
+- `nodemailer` is listed in `serverExternalPackages` in `next.config.mjs` (required for Turbopack compatibility)
 
 ## Deployment Notes
 
@@ -27,6 +28,11 @@
 - Landing page renders and animates without layout shift
 - Shopping Cart supports add/remove/quantity and persists via localStorage
 - Guest cart items migrate correctly to user accounts upon login
+- Authenticated user can complete checkout and is redirected to My Orders
+- Unauthenticated access to `/checkout` and `/orders` correctly redirects to login
+- Order appears in My Orders immediately after checkout
+- Order confirmation email is dispatched after checkout (verify in inbox or dev console)
+- Email failure does not block order placement
 - Product browse, detail, wishlist, and fashion pages work with backend data
 - Signup requires email verification before login
 - Admin Portal remains isolated (Staff-only access, separate Header/Footer layout)

@@ -73,6 +73,22 @@ For this project scope, Next.js with MongoDB and GridFS is the default recommend
 - session_id or user_id: string (required, indexed)
 - created_at: timestamp
 
+### Collection: orders
+
+- _id: ObjectId (primary key)
+- userId: ObjectId (ref: users, required, indexed)
+- items: array of embedded line items
+  - productId: ObjectId (ref: products)
+  - title: string
+  - price: number
+  - quantity: number
+  - size: string (optional)
+  - color: string (optional)
+- total: number (required)
+- transactionId: string (required, unique)
+- created_at: timestamp
+- updated_at: timestamp
+
 ### Collection: users
 
 - _id: ObjectId (primary key)
@@ -260,6 +276,81 @@ Error response example:
 }
 ```
 
+### POST /api/checkout
+
+Purpose:
+
+- Process a simulated payment and persist an authenticated user's order to MongoDB.
+- Sends a branded HTML order confirmation email to the user on success.
+
+Authorization:
+
+- Requires valid user session cookie. Returns 401 if unauthenticated.
+
+Request body:
+
+```json
+{
+  "items": [
+    { "id": "...", "title": "Hoodie", "price": 49.99, "quantity": 2, "size": "M", "color": "Black" }
+  ],
+  "total": 99.98
+}
+```
+
+Behavior:
+
+- Validates session and cart contents (returns 400 for empty cart).
+- Simulates a 1-second payment latency.
+- Persists the order to the `orders` collection with a generated `transactionId` (`ch_<random>`).
+- Sends a styled HTML confirmation email via Nodemailer (non-blocking — email failures do not cancel the order).
+
+Success response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Order placed successfully.",
+    "transactionId": "ch_abc123"
+  }
+}
+```
+
+Notes:
+
+- `nodemailer` must be listed in `serverExternalPackages` in `next.config.mjs` to avoid Turbopack bundling conflicts.
+- Email delivery degrades gracefully to a console preview in development when SMTP is not configured.
+
+### GET /api/orders
+
+Purpose:
+
+- Return the authenticated user's full order history, sorted newest first.
+
+Authorization:
+
+- Requires valid user session cookie. Returns 401 if unauthenticated.
+
+Response example:
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "661f4fd8a0b4e5eab95d0042",
+      "transactionId": "ch_abc123",
+      "total": 99.98,
+      "createdAt": "2025-04-24T10:30:00.000Z",
+      "items": [
+        { "productId": "...", "title": "Hoodie", "price": 49.99, "quantity": 2, "size": "M", "color": "Black" }
+      ]
+    }
+  ]
+}
+```
+
 ### Optional Favourites Endpoints
 
 - GET /api/favourites?sessionId=...
@@ -298,8 +389,14 @@ If backend persistence is postponed, a localStorage fallback is acceptable for M
 - DUMMYJSON_BASE_URL
 - PRODUCT_SYNC_ADMIN_TOKEN
 - AUTH_JWT_SECRET
-- ADMIN_EMAILS
-- ADMIN_PASSWORD
+  - ADMIN_EMAILS
+  - ADMIN_PASSWORD
+  - SMTP_HOST
+  - SMTP_PORT
+  - SMTP_USER
+  - SMTP_PASS
+  - SMTP_FROM_EMAIL
+  - SMTP_FROM_NAME
 
 ## Error Handling Standard
 
@@ -327,6 +424,11 @@ Return structured JSON errors with predictable shape.
 - Login endpoint validates credentials and returns session/token.
 - Wishlist endpoints support mark and unmark flows correctly.
 - Admin product endpoints enforce authorization and perform CRUD correctly.
+- Checkout endpoint rejects unauthenticated and empty-cart requests.
+- Checkout endpoint persists a complete order document including all line items.
+- Checkout endpoint triggers a confirmation email without blocking the order response.
+- Orders endpoint returns scoped history for the requesting user only.
+- Orders endpoint correctly rejects unauthenticated requests.
 
 ### Integration Checks
 
@@ -336,6 +438,8 @@ Return structured JSON errors with predictable shape.
 - Product browsing UI reads category-filtered product data.
 - Wishlist UI reflects saved favourites state.
 - Admin panel can create and manage products end to end.
+- Checkout endpoint saves orders and sends confirmation emails.
+- Orders history endpoint scopes results to the authenticated user.
 
 ## Deployment Notes
 
@@ -356,3 +460,5 @@ Return structured JSON errors with predictable shape.
 7. Error responses follow the standard shape.
 8. DummyJSON-to-MongoDB sync pipeline is implemented and documented.
 9. Basic endpoint tests or validation scripts pass.
+10. Checkout endpoint saves orders and sends transactional emails.
+11. Orders history endpoint returns scoped, correctly shaped data.

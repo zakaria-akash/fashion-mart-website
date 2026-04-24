@@ -50,6 +50,8 @@ The application is a fashion-commerce style landing page with the following key 
 8. Slight, elegant, and professional motion across key UI components
 9. Header primary CTA set to Login, with elegant two-way navigation between Login and Sign Up pages
 10. Integrated Shopping Cart with persistent global state, quantity controls, and guest session support
+11. Simulated Checkout and Order Placement: authenticated users can complete a purchase via a secure checkout page with simulated payment processing, receiving a branded order confirmation email on success
+12. My Orders Page: authenticated users can view their full order history with per-order item breakdowns, transaction IDs, and dates
 
 ## Design Direction (From Provided Assets)
 
@@ -66,7 +68,7 @@ The application is a fashion-commerce style landing page with the following key 
 2. Spacing, type hierarchy, and section order match expected structure
 3. Site remains responsive and stable across standard breakpoints
 4. Backend-dependent features function correctly with clean data flow
-5. Authentication, product browsing, wishlist, shopping cart, and the specialized Admin Portal are fully functional
+5. Authentication, product browsing, wishlist, shopping cart, checkout, order history, and the specialized Admin Portal are fully functional
 6. Staff-only routes are protected and inaccessible to client users
 6. Subtle animations improve polish without hurting readability or performance
 7. Codebase is modular and straightforward to maintain
@@ -81,7 +83,7 @@ The application is a fashion-commerce style landing page with the following key 
 
 ## Out of Scope for Initial Build
 
-- Full e-commerce checkout payments (Stripe/Paypal)
+- Real payment gateway integration (Stripe/PayPal) — checkout uses simulated processing
 - CMS integration
 - Complex analytics/event pipeline
 
@@ -94,6 +96,9 @@ The application is a fashion-commerce style landing page with the following key 
 - Product browsing and category filtering contracts finalized
 - Wishlist data contract and persistence strategy finalized
 - Admin panel product CRUD scope finalized
+- Checkout flow and simulated payment contract finalized
+- Order persistence and My Orders page scope finalized
+- Order confirmation email template and delivery strategy finalized
 - Source-to-database mapping finalized (DummyJSON fields to internal product schema)
 - Animation tokens and motion rules finalized
 - Folder structure and conventions finalized

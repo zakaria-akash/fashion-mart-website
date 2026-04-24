@@ -13,4 +13,5 @@ export const appRoutes = {
   admin: "/admin",
   adminLogin: "/admin-login",
   checkout: "/checkout",
+  orders: "/orders",
 };

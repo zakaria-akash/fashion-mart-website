@@ -24,6 +24,15 @@
   - persistence across page refresh
   - checkout block for guest users (login redirect)
   - guest cart migration to user account on login
+- Manual Checkout and Orders verification:
+  - authenticated user can reach `/checkout` and see full order summary
+  - unauthenticated access to `/checkout` redirects to login
+  - Pay Now triggers simulated processing (1s latency) then clears cart
+  - successful checkout redirects to `/orders` (My Orders page)
+  - order appears immediately at top of order history list
+  - order card displays transaction ID, date, item breakdown (title, qty, size, color), and total
+  - unauthenticated access to `/orders` redirects to login
+  - empty order state renders correctly with Browse Products link
 - Manual auth smoke test:
   - client user cannot access `/admin` (redirected to home)
   - admin login via footer button (opens in new tab)
@@ -34,6 +43,9 @@
 - Manual SMTP verification:
   - Gmail SMTP transporter verified
   - real verification emails accepted by Gmail
+  - order confirmation email delivered after checkout (subject: "Fashion Mart: Order Confirmed #...")
+  - confirmation email contains item table, transaction ID, and total
+  - email failure does not cancel the order (non-blocking error handling confirmed in logs)
 
 ## Responsive QA Notes
 
@@ -46,6 +58,10 @@
 - Focus visibility is now globally stronger for keyboard users.
 - Reduced-motion users receive near-instant transitions and no reveal animations.
 - Existing semantic landmarks remain intact through the shared layout and page shells.
+
+## Build Fix Applied
+
+- **Turbopack / Nodemailer conflict**: `nodemailer` (CJS-only package) caused a `Parsing ecmascript source code failed` error in `src/lib/email.js` when bundled by Turbopack. Fixed by adding `serverExternalPackages: ["nodemailer"]` to `next.config.mjs`, telling Turbopack to skip bundling it and let Node.js resolve it natively.
 
 ## Residual Risks
 

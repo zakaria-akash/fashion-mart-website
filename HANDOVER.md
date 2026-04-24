@@ -4,7 +4,8 @@
 
 Fashion Mart is now in a release-ready posture with a fully separated Client Storefront and Admin Portal.
 
-- **Storefront**: MongoDB-backed products, wishlist, shopping cart, and auth flows.
+- **Storefront**: MongoDB-backed products, wishlist, shopping cart, checkout, order history, and auth flows.
+- **Checkout & Email**: Authenticated users can place simulated orders. A branded HTML confirmation email is dispatched via Nodemailer after each successful order.
 - **Admin Portal**: Specialized staff interface with environment-locked master credentials.
 - **Media**: GridFS-based image serving with high-performance caching.
 - **Data**: DummyJSON sync into MongoDB as runtime source of truth.
@@ -24,7 +25,8 @@ Fashion Mart is now in a release-ready posture with a fully separated Client Sto
 - `ADMIN_EMAILS`: Authorized staff emails (comma separated)
 - `ADMIN_PASSWORD`: Hardcoded master password for Admin Portal
 - `APP_BASE_URL`: (default: http://localhost:3000)
-- `SMTP_*`: Standard mail configuration for user verification
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`: Mail transport (used for both email verification and order confirmation)
+- `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`: Sender identity in outgoing emails
 
 ## Key Routes & Navigation
 
@@ -32,6 +34,8 @@ Fashion Mart is now in a release-ready posture with a fully separated Client Sto
 - Home: `/`
 - Catalogue: `/products`
 - Wishlist: `/wishlist`
+- Checkout: `/checkout` (authenticated only)
+- My Orders: `/orders` (authenticated only — full order history)
 - Login/Signup: `/login`, `/signup`
 
 ### 🛠️ Admin Portal
@@ -47,6 +51,10 @@ Fashion Mart is now in a release-ready posture with a fully separated Client Sto
 - `POST /api/auth/admin-login`: Specialized staff authorization (master credentials).
 - `GET /api/auth/me`: Resolve current session (DB users or master-admin).
 - `POST /api/auth/logout`: Terminate session.
+
+### 🛍️ Checkout & Orders
+- `POST /api/checkout`: Place an order (auth required). Saves to MongoDB and triggers a confirmation email.
+- `GET /api/orders`: Retrieve the authenticated user's order history (newest first), including full item breakdowns.
 
 ### 📦 Catalogue & Management
 - `GET /api/products`: Public catalogue data.

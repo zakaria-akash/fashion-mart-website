@@ -21,6 +21,8 @@ Use slight, elegant, professional animation across key components. Motion should
 - Product Browsing: category-aware product listing and filtering UI
 - Wishlist: mark and unmark favourites from product cards and persist state
 - Shopping Cart: global state managed via Context API with guest and user persistence
+- Checkout: authenticated-only page presenting order summary and triggering simulated payment via `POST /api/checkout`; redirects to My Orders on success
+- My Orders: authenticated-only page fetching and displaying the user's full order history with per-order item breakdowns
 - Admin Panel: product management screens to add and maintain listings
 - Lifestyle: editorial-style lifestyle page linked from header navigation
 
@@ -87,15 +89,17 @@ Define these before implementation starts.
 
 1. Product Browsing Page (catalog and category filters)
 1. Wishlist Page (favourite products)
+1. Checkout Page (order summary, simulated payment, redirects to My Orders)
+1. My Orders Page (authenticated order history with item breakdown, status badge, and empty state)
 1. Admin Panel (add product and manage listings)
-15. Lifestyle Page (style journal, curated cards, and product link-out)
-16. Admin Login Portal (specialized Staff Login)
-17. Admin Dashboard (Staff-only inventory management)
+16. Lifestyle Page (style journal, curated cards, and product link-out)
+17. Admin Login Portal (specialized Staff Login)
+18. Admin Dashboard (Staff-only inventory management)
 
 
 ## Component Breakdown
 
-- Header: logo, nav links, login/cart buttons (Public); logo + Staff Log Out (Admin Portal); logo + Visit Site (Admin Login)
+- Header: logo, nav links, login/cart buttons (Public); **My Orders** link + Log Out for authenticated users; logo + Staff Log Out (Admin Portal); logo + Visit Site (Admin Login)
 - Hero Section: heading group, supporting copy, CTA, hero image
 - Brand Strip: horizontal logo row
 - Product Card: image, title, price, wishlist/cart quick-actions
@@ -105,6 +109,8 @@ Define these before implementation starts.
 - Newsletter Section: heading, subtitle, email form
 - Footer: marketing links and social icons (Public); simplified copyright-only view (Admin)
 - Auth Form: reusable input and submit states for signup/login
+- CheckoutClientPage: order summary list, total display, processing state, and Pay Now CTA; empty-cart guard
+- OrderCard: displays transaction ID, date, "Confirmed" status badge, itemized product list with qty/size/color, and order total
 - Admin Portal UI: split-panel dashboard with sticky editor and real-time inventory search
 - Admin Login UI: high-contrast dark portal interface for staff authorization
 
@@ -177,6 +183,12 @@ Expected behavior.
 - Wishlist mark/unmark behavior is functional and persisted
 - Admin panel can add products and manage listings
 - Shopping Cart is functional with quantity controls and guest-to-user migration
+- Checkout page presents order summary and processes simulated payment
+- Successful checkout clears the cart, shows a toast with email confirmation notice, and redirects to My Orders
+- My Orders page fetches from `/api/orders` and renders order cards with item breakdowns
+- Unauthenticated access to `/checkout` and `/orders` redirects to login
+- Order confirmation email is sent after checkout success (non-blocking; console preview in dev)
+- Header shows My Orders link for authenticated users on both desktop and mobile
 - Newsletter form maps to backend contract
 - No material image-driven layout shift
 - Core performance and accessibility quality checks completed
