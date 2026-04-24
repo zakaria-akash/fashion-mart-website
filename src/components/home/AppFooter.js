@@ -55,8 +55,8 @@ export default function AppFooter() {
   if (isAdminView) {
     return (
       <footer className="w-full bg-black py-6">
-        <p className="text-center text-[0.72em] font-normal tracking-[0.03em] text-[#8A8A8A]">
-          Copyright 2026 Fashion. All rights reserved.
+        <p className="text-center text-[0.68em] font-normal leading-[1.5] tracking-[0.03em] text-[#8A8A8A] sm:text-[0.72em] lg:text-[0.75em]">
+          Copyright 2026 Fashion Mart. All rights reserved by Zakaria Ibrahim (zakaria.93@yahoo.com).
         </p>
       </footer>
     );
@@ -135,7 +135,7 @@ export default function AppFooter() {
       {/* Copyright strip with low-emphasis styling */}
       <div className="border-t border-white/10 px-4 py-3 sm:px-6 lg:px-10">
         <p className="text-center text-[0.68em] font-normal leading-[1.5] tracking-[0.03em] text-[#8A8A8A] sm:text-[0.72em] lg:text-[0.75em]">
-          Copyright 2026 Fashion. All rights reserved.
+          Copyright 2026 Fashion Mart. All rights reserved by Zakaria Ibrahim (zakaria.93@yahoo.com).
         </p>
       </div>
     </footer>

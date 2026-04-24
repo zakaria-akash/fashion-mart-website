@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import PageIntro from "@/components/shared/PageIntro";
 import { apiEndpoints } from "@/lib/api/endpoints";
+import { appRoutes } from "@/lib/config/routes";
 import { requestJson } from "@/lib/api/request";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useToast } from "@/components/providers/ToastProvider";
@@ -40,7 +41,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!authLoading && (!user || user.role !== "admin")) {
       showToast("Unauthorized access. Admin privileges required.", { tone: "error" });
-      router.replace("/");
+      router.replace(appRoutes.adminLogin);
     }
   }, [user, authLoading, router, showToast]);
 
