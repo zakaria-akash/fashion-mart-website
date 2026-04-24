@@ -126,7 +126,8 @@ Connect UI to production-like data and complete required backend capabilities.
 ### Phase3 Key Activities
 
 - Implement products API endpoint.
-- Implement auth endpoints (signup/login) and session handling.
+- Implement auth endpoints (signup/login/staff-login) and specialized session handling.
+- Implement master admin credential check via environment variables.
 - Implement newsletter endpoint with robust validation.
 - Implement admin-safe sync endpoint to import products from DummyJSON.
 - Implement GridFS file streaming endpoint.

@@ -88,26 +88,25 @@ Define these before implementation starts.
 1. Product Browsing Page (catalog and category filters)
 1. Wishlist Page (favourite products)
 1. Admin Panel (add product and manage listings)
-1. Lifestyle Page (style journal, curated cards, and product link-out)
+15. Lifestyle Page (style journal, curated cards, and product link-out)
+16. Admin Login Portal (specialized Staff Login)
+17. Admin Dashboard (Staff-only inventory management)
+
 
 ## Component Breakdown
 
-- Header: logo, nav links, login button
+- Header: logo, nav links, login/cart buttons (Public); logo + Staff Log Out (Admin Portal); logo + Visit Site (Admin Login)
 - Hero Section: heading group, supporting copy, CTA, hero image
 - Brand Strip: horizontal logo row
-- Product Card: image, title, support line, arrow affordance
+- Product Card: image, title, price, wishlist/cart quick-actions
 - Promo Banner: promotional image, offer copy, CTA
 - Favourite Cards: two featured cards side by side
 - App Download Section: copy, store badges, device mockup
 - Newsletter Section: heading, subtitle, email form
-- Footer: brand block, social icons, link columns
+- Footer: marketing links and social icons (Public); simplified copyright-only view (Admin)
 - Auth Form: reusable input and submit states for signup/login
-- Product Grid: reusable card list for category-based browsing
-- Wishlist Toggle: reusable favourite control with active/inactive states
-- Admin Product Form: product create/update form with validation
-- Admin Product Table/List: manage existing product records
-- Auth Switcher: elegant two-way toggle between login and signup pages
-- Lifestyle Cards Grid: editorial cards and lifestyle highlights
+- Admin Portal UI: split-panel dashboard with sticky editor and real-time inventory search
+- Admin Login UI: high-contrast dark portal interface for staff authorization
 
 ## Animation Plan by Section
 

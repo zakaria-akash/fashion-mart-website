@@ -25,11 +25,12 @@
   - checkout block for guest users (login redirect)
   - guest cart migration to user account on login
 - Manual auth smoke test:
-  - signup
-  - blocked pre-verification login
-  - email verification
-  - successful login
-  - persisted session lookup
+  - client user cannot access `/admin` (redirected to home)
+  - admin login via footer button (opens in new tab)
+  - admin authorization via master credentials (`admin12345`)
+  - admin dashboard CRUD and Sync verified
+  - admin logout redirects to staff login portal
+  - client user signup and standard login
 - Manual SMTP verification:
   - Gmail SMTP transporter verified
   - real verification emails accepted by Gmail

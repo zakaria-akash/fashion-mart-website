@@ -17,7 +17,8 @@
 ### Key Highlights
 - **🎨 High-Fidelity UI**: ~90% visual accuracy to design references with a custom motion system.
 - **🔄 Dynamic Sync**: Automated pipeline to ingest and normalize data from external APIs (DummyJSON).
-- **🛡️ Secure Auth**: Full JWT-based identity system with email verification and role-based access.
+- **🛡️ Secure Auth**: Dual-layered identity system: standard database users for clients and environment-locked master credentials for staff.
+- **🛠️ Specialized Portals**: Fully isolated Client Storefront and Admin Inventory Manager with distinct navigation and layouts.
 - **📦 Smart Persistence**: Unified wishlist and shopping cart logic that merges guest sessions into user accounts.
 - **🖼️ GridFS Integration**: Internal high-performance image streaming with aggressive caching.
 
@@ -84,9 +85,9 @@ When an admin triggers a sync, the system:
 4. Performs an **Upsert** in MongoDB to ensure data freshness without duplicates.
 
 ### 2. Authentication Lifecycle
-- **Signup**: User enters details → System hashes password → Generates token → Sends verification email via **Nodemailer**.
-- **Login**: Verifies hash → Attaches **HttpOnly JWT Cookie** → Refreshes global `AuthContext`.
-- **Authorization**: Middleware-like helpers in API routes check roles (User vs Admin).
+- **Clients**: Standard signup/login flow using database-backed users and email verification.
+- **Staff**: Specialized login portal (`/admin-login`) verifying against `ADMIN_EMAILS` and `ADMIN_PASSWORD` env variables.
+- **Authorization**: Role-based guards prevent client users from accessing the `/admin` workspace.
 
 ### 3. Unified Wishlist
 - **Guests**: Items are stored against a `sessionId` (UUID) stored in a long-lived cookie.

@@ -159,7 +159,21 @@ Request body:
 
 Purpose:
 
-- Authenticate an existing user and create a session/token.
+- Authenticate an existing public user and create a session/token.
+
+### POST /api/auth/admin-login
+
+Purpose:
+
+- Specialized authentication for staff members using environment-locked master credentials.
+- Bypasses standard user database for the master admin check.
+
+### GET /api/auth/me
+
+Purpose:
+
+- Resolve current session identity.
+- Supports both database-backed users and hardcoded master admin profiles.
 
 Request body:
 
@@ -284,6 +298,8 @@ If backend persistence is postponed, a localStorage fallback is acceptable for M
 - DUMMYJSON_BASE_URL
 - PRODUCT_SYNC_ADMIN_TOKEN
 - AUTH_JWT_SECRET
+- ADMIN_EMAILS
+- ADMIN_PASSWORD
 
 ## Error Handling Standard
 

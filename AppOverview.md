@@ -42,7 +42,10 @@ The application is a fashion-commerce style landing page with the following key 
 3. User authentication flow (Sign up and Login)
 4. Product browsing experience with category-wise listing and product information
 5. Wishlist interaction (mark and unmark favourite products) with persisted state
-6. Basic admin panel to add products and manage product listings
+6. Dedicated Admin Portal: A fully isolated staff interface for product management
+   - Secure staff login via hardcoded environment credentials
+   - Specialized header/footer layout distinct from the public storefront
+   - Premium Inventory Manager dashboard with split-panel CRUD operations
 7. Newsletter email submission to backend with strict validation
 8. Slight, elegant, and professional motion across key UI components
 9. Header primary CTA set to Login, with elegant two-way navigation between Login and Sign Up pages
@@ -63,7 +66,8 @@ The application is a fashion-commerce style landing page with the following key 
 2. Spacing, type hierarchy, and section order match expected structure
 3. Site remains responsive and stable across standard breakpoints
 4. Backend-dependent features function correctly with clean data flow
-5. Authentication, product browsing, wishlist, admin, and shopping cart are fully functional
+5. Authentication, product browsing, wishlist, shopping cart, and the specialized Admin Portal are fully functional
+6. Staff-only routes are protected and inaccessible to client users
 6. Subtle animations improve polish without hurting readability or performance
 7. Codebase is modular and straightforward to maintain
 
