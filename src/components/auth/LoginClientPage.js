@@ -79,8 +79,8 @@ export default function LoginClientPage({ initialEmail = "", verified = false })
       
       showToast(`Welcome back, ${user?.name || "there"}.`, { label: "Login successful" });
       
-      // Role-based redirection
-      router.push(user?.role === "admin" ? appRoutes.admin : appRoutes.products);
+      // All standard logins redirect to Home page first
+      router.push(appRoutes.home);
       router.refresh();
     } catch (requestError) {
       const nextError = requestError.message || "Unable to login right now.";

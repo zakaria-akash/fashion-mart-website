@@ -89,7 +89,7 @@ export default function AppFooter() {
                     alt={icon.alt}
                     width={32}
                     height={32}
-                    className="h-8 w-8 rounded-[5px]"
+                    className="h-8 w-auto rounded-[5px]"
                   />
                 </a>
               ))}
